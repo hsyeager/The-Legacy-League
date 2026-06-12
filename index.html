@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>The Legacy League · World Cup 2026</title>
+<style>html,body{margin:0;padding:0;background:#0a0f1c}*{box-sizing:border-box}#boot{color:#8492a8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;text-align:center;padding:60px 20px;font-size:14px}</style>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head><body>
+<div id="root"><div id="boot">Loading The Legacy League…</div></div>
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useMemo } = React;
+
+
+/* ------------------------------------------------------------------ */
+/*  DATA                                                               */
+/* ------------------------------------------------------------------ */
+
+const TEAMS = {
+  // Tier 1 — Elite Favourites
+  ES:  { name: "Spain",          flag: "🇪🇸", tier: 1 },
+  BE:  { name: "Belgium",        flag: "🇧🇪", tier: 1 },
+  FR:  { name: "France",         flag: "🇫🇷", tier: 1 },
+  AR:  { name: "Argentina",      flag: "🇦🇷", tier: 1 },
+  ENG: { name: "England",        flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", tier: 1 },
+  PT:  { name: "Portugal",       flag: "🇵🇹", tier: 1 },
+  NO:  { name: "Norway",         flag: "🇳🇴", tier: 1 },
+  BR:  { name: "Brazil",         flag: "🇧🇷", tier: 1 },
+  DE:  { name: "Germany",        flag: "🇩🇪", tier: 1 },
+  CO:  { name: "Colombia",       flag: "🇨🇴", tier: 1 },
+  NL:  { name: "Netherlands",    flag: "🇳🇱", tier: 1 },
+  MA:  { name: "Morocco",        flag: "🇲🇦", tier: 1 },
+  // Tier 2 — Contenders
+  JP:  { name: "Japan",          flag: "🇯🇵", tier: 2 },
+  CH:  { name: "Switzerland",    flag: "🇨🇭", tier: 2 },
+  HR:  { name: "Croatia",        flag: "🇭🇷", tier: 2 },
+  EC:  { name: "Ecuador",        flag: "🇪🇨", tier: 2 },
+  MX:  { name: "Mexico",         flag: "🇲🇽", tier: 2 },
+  UY:  { name: "Uruguay",        flag: "🇺🇾", tier: 2 },
+  AT:  { name: "Austria",        flag: "🇦🇹", tier: 2 },
+  US:  { name: "USA",            flag: "🇺🇸", tier: 2 },
+  SWE: { name: "Sweden",         flag: "🇸🇪", tier: 2 },
+  SN:  { name: "Senegal",        flag: "🇸🇳", tier: 2 },
+  SCO: { name: "Scotland",       flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", tier: 2 },
+  TR:  { name: "Turkey",         flag: "🇹🇷", tier: 2 },
+  // Tier 3 — Dark Horses
+  KR:  { name: "South Korea",    flag: "🇰🇷", tier: 3 },
+  CA:  { name: "Canada",         flag: "🇨🇦", tier: 3 },
+  AU:  { name: "Australia",      flag: "🇦🇺", tier: 3 },
+  BIH: { name: "Bosnia",         flag: "🇧🇦", tier: 3 },
+  EG:  { name: "Egypt",          flag: "🇪🇬", tier: 3 },
+  CIV: { name: "Ivory Coast",    flag: "🇨🇮", tier: 3 },
+  GH:  { name: "Ghana",          flag: "🇬🇭", tier: 3 },
+  IRN: { name: "Iran",           flag: "🇮🇷", tier: 3 },
+  DZ:  { name: "Algeria",        flag: "🇩🇿", tier: 3 },
+  CZE: { name: "Czech Republic", flag: "🇨🇿", tier: 3 },
+  PAR: { name: "Paraguay",       flag: "🇵🇾", tier: 3 },
+  TN:  { name: "Tunisia",        flag: "🇹🇳", tier: 3 },
+  // Tier 4 — Long Shots
+  COD: { name: "DR Congo",       flag: "🇨🇩", tier: 4 },
+  PAN: { name: "Panama",         flag: "🇵🇦", tier: 4 },
+  IRQ: { name: "Iraq",           flag: "🇮🇶", tier: 4 },
+  JOR: { name: "Jordan",         flag: "🇯🇴", tier: 4 },
+  UZB: { name: "Uzbekistan",     flag: "🇺🇿", tier: 4 },
+  QA:  { name: "Qatar",          flag: "🇶🇦", tier: 4 },
+  RSA: { name: "South Africa",   flag: "🇿🇦", tier: 4 },
+  HAI: { name: "Haiti",          flag: "🇭🇹", tier: 4 },
+  CPV: { name: "Cape Verde",     flag: "🇨🇻", tier: 4 },
+  NZ:  { name: "New Zealand",    flag: "🇳🇿", tier: 4 },
+  CUW: { name: "Curacao",        flag: "🇨🇼", tier: 4 },
+  KSA: { name: "Saudi Arabia",   flag: "🇸🇦", tier: 4 },
+};
+
+// Each manager (shown as "Group N") owns one team per tier.
+const SQUADS = [
+  ["ES", "TR", "CIV", "CUW"],   // 1, 24, 25, 48
+  ["FR", "SCO", "KR", "HAI"],   // 2, 23, 26, 47
+  ["AR", "SWE", "EG", "NZ"],    // 3, 22, 27, 46
+  ["ENG", "AT", "CA", "KSA"],   // 4, 21, 28, 45
+  ["BR", "EC", "DZ", "PAN"],    // 5, 20, 29, 44
+  ["PT", "CH", "AU", "CPV"],    // 6, 19, 30, 43
+  ["DE", "SN", "GH", "IRQ"],    // 7, 18, 31, 42
+  ["NL", "JP", "PAR", "JOR"],   // 8, 17, 32, 41
+  ["BE", "MX", "IRN", "QA"],    // 9, 16, 33, 40
+  ["NO", "US", "CZE", "UZB"],   // 10, 15, 34, 39
+  ["CO", "HR", "BIH", "COD"],   // 11, 14, 35, 38
+  ["MA", "UY", "TN", "RSA"],    // 12, 13, 36, 37
+];
+
+// Three managers per group — one in each parallel league. Index matches SQUADS.
+const MANAGERS = [
+  { gold: "Garrett Schreffler",            silver: "Eiseman / Schneider",         bronze: "Jake Calamari" },
+  { gold: "Max Walker",                    silver: "Sam Naim",                    bronze: "Jake Price" },
+  { gold: "Cole Miller",                   silver: "Sullivan / Biersach",         bronze: "Ethan Core" },
+  { gold: "Harrison Yeager",               silver: "Nick Moeller",                bronze: "Brian Damp" },
+  { gold: "Schmidt / Nielsen / Churney",   silver: "Daniel Hamerschlag",          bronze: "Connor Dyball" },
+  { gold: "Andrew Kowal",                  silver: "Joe Moeller",                 bronze: "Andrew Guckes" },
+  { gold: "Steinberger / Nusim",           silver: "Danny Chryst",                bronze: "Grant Hevia" },
+  { gold: "Chapman / Perlstein",           silver: "Du / Kiskinis / Shapiro",     bronze: "Joe De Lia" },
+  { gold: "Richard Antwi",                 silver: "Aidan Pierce",                bronze: "Ben Raffel" },
+  { gold: "Dylan Emert",                   silver: "Elias Baldino",               bronze: "Drew Munger" },
+  { gold: "Eddie Dunn",                    silver: "Tomas Montenegro",            bronze: "Mitch Schuster" },
+  { gold: "David Berman",                  silver: "JD Danielson",                bronze: "Dylan Friendly" },
+];
+
+const DIVISIONS = [
+  { key: "gold",   label: "Premier League", color: "#e8be4a", dim: "#d4a017" },
+  { key: "silver", label: "Undertakers",    color: "#cdd5e0", dim: "#9aa6b8" },
+  { key: "bronze", label: "Bottom Feeders", color: "#d99a5b", dim: "#b87333" },
+];
+const DIV_COLOR = { gold: "#e8be4a", silver: "#cdd5e0", bronze: "#d99a5b" };
+
+const TIER_META = {
+  1: { name: "Elite Favourites", odds: "+450 to +5000",      color: "#d4a017", bg: "rgba(212,160,23,0.10)" },
+  2: { name: "Contenders",       odds: "+5500 to +20000",    color: "#9aa6b8", bg: "rgba(154,166,184,0.10)" },
+  3: { name: "Dark Horses",      odds: "+20000 to +70000",   color: "#3f9c5b", bg: "rgba(63,156,91,0.12)" },
+  4: { name: "Long Shots",       odds: "+100000+",           color: "#c2547f", bg: "rgba(194,84,127,0.12)" },
+};
+
+// Furthest stage / placement options
+const STAGES = [
+  { key: "GROUP",    label: "Out — group stage" },
+  { key: "R32",      label: "Round of 32" },
+  { key: "R16",      label: "Round of 16" },
+  { key: "QF",       label: "Quarter-final" },
+  { key: "SF",       label: "Semi-final (4th)" },
+  { key: "THIRD",    label: "3rd place" },
+  { key: "FINAL",    label: "Runner-up" },
+  { key: "CHAMPION", label: "Champion 🏆" },
+];
+
+// Cumulative round bonuses for reaching a stage (R32 has none — folded into the +3 for reaching the knockouts)
+const ROUND_BONUS = {
+  GROUP: 0,
+  R32: 0,
+  R16: 2,
+  QF: 2 + 4,
+  SF: 2 + 4 + 6,
+  THIRD: 2 + 4 + 6,
+  FINAL: 2 + 4 + 6 + 8,
+  CHAMPION: 2 + 4 + 6 + 8,
+};
+
+// Knockout wins implied by furthest stage
+const KO_WINS = {
+  GROUP: 0, R32: 0, R16: 1, QF: 2, SF: 3, THIRD: 4, FINAL: 4, CHAMPION: 5,
+};
+
+// Win value by tier — top half of the field (1–2) pays 3, underdog half (3–4) pays 5.
+const WIN_PTS = { 1: 3, 2: 3, 3: 5, 4: 5 };
+
+// Breadth: each team that reaches the knockouts (R32) earns the manager points.
+const REACH_KO_BONUS = 3;
+
+const PLACEMENT_BONUS = { CHAMPION: 8, FINAL: 4, THIRD: 2 };
+
+/* ------------------------------------------------------------------ */
+/*  ESPN LIVE SYNC                                                     */
+/*  Endpoint: site.api.espn.com  (no key, JSON, CORS-open)             */
+/* ------------------------------------------------------------------ */
+
+const ESPN_URL =
+  "https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?limit=950&dates=20260611-20260720";
+
+// Map ESPN team strings -> our codes. Seed with our own names/codes, then aliases.
+const SYN = {};
+Object.keys(TEAMS).forEach((c) => {
+  SYN[c.toLowerCase()] = c;
+  SYN[TEAMS[c].name.toLowerCase()] = c;
+});
+const alias = (code, ...keys) => keys.forEach((k) => { SYN[k.toLowerCase()] = code; });
+alias("ES", "esp"); alias("BE", "bel"); alias("FR", "fra"); alias("AR", "arg");
+alias("ENG", "eng"); alias("PT", "por", "portugal"); alias("NO", "nor"); alias("BR", "bra");
+alias("DE", "ger", "germany"); alias("CO", "col"); alias("NL", "ned", "holland");
+alias("MA", "mar", "morocco"); alias("JP", "jpn"); alias("CH", "sui", "switzerland");
+alias("HR", "cro", "croatia"); alias("EC", "ecu"); alias("MX", "mex"); alias("UY", "uru");
+alias("AT", "aut"); alias("US", "usa", "united states", "united states of america");
+alias("SWE", "swe"); alias("SN", "sen"); alias("SCO", "sco");
+alias("TR", "tur", "türkiye", "turkiye"); alias("KR", "kor", "korea republic", "korea", "republic of korea");
+alias("CA", "can"); alias("AU", "aus"); alias("BIH", "bih", "bosnia and herzegovina", "bosnia-herzegovina");
+alias("EG", "egy"); alias("CIV", "civ", "côte d'ivoire", "cote d'ivoire", "ivory coast");
+alias("GH", "gha"); alias("IRN", "iri", "irn", "iran ir", "ir iran");
+alias("DZ", "alg", "dza"); alias("CZE", "cze", "czechia"); alias("PAR", "par");
+alias("TN", "tun"); alias("COD", "cod", "drc", "congo dr", "dr congo", "democratic republic of the congo", "congo");
+alias("PAN", "pan"); alias("IRQ", "irq"); alias("JOR", "jor"); alias("UZB", "uzb");
+alias("QA", "qat"); alias("RSA", "rsa", "saf"); alias("HAI", "hai");
+alias("CPV", "cpv", "cabo verde", "cape verde"); alias("NZ", "nzl");
+alias("CUW", "cuw", "curaçao"); alias("KSA", "ksa", "sau");
+
+function resolveCode(team) {
+  if (!team) return null;
+  const keys = [team.abbreviation, team.displayName, team.shortDisplayName, team.name, team.location]
+    .filter(Boolean).map((s) => String(s).toLowerCase().trim());
+  for (const k of keys) if (SYN[k]) return SYN[k];
+  return null;
+}
+
+function classifyLabel(label) {
+  const l = String(label || "").toLowerCase();
+  if (l.includes("group")) return "GROUP";
+  if (l.includes("32")) return "R32";
+  if (l.includes("16")) return "R16";
+  if (l.includes("quarter")) return "QF";
+  if (l.includes("semi")) return "SF";       // before "final" (semifinal contains "final")
+  if (l.includes("3rd") || l.includes("third")) return "THIRD";
+  if (l.includes("final")) return "FINAL";
+  return "GROUP";
+}
+
+function parseEvents(json) {
+  const entries = json?.leagues?.[0]?.calendar?.[0]?.entries || [];
+  const windows = entries.map((e) => ({
+    start: new Date(e.startDate), end: new Date(e.endDate), type: classifyLabel(e.label),
+  }));
+  const roundOf = (dateStr) => {
+    const d = new Date(dateStr);
+    const w = windows.find((w) => d >= w.start && d < w.end);
+    return w ? w.type : "GROUP";
+  };
+
+  const groupAcc = {}, fixtures = {}, koGoals = {};
+  let finalWinner = null, thirdWinner = null;
+
+  for (const ev of json?.events || []) {
+    const comp = ev.competitions?.[0];
+    if (!comp) continue;
+    const completed = comp.status?.type?.completed === true || comp.status?.type?.state === "post";
+    const cs = comp.competitors || [];
+    if (cs.length < 2) continue;
+    const [A, B] = cs;
+    const ca = resolveCode(A.team), cb = resolveCode(B.team);
+    const sa = parseInt(A.score, 10), sb = parseInt(B.score, 10);
+    const round = roundOf(ev.date);
+
+    if (round === "GROUP") {
+      if (completed && Number.isFinite(sa) && Number.isFinite(sb)) {
+        if (ca) (groupAcc[ca] = groupAcc[ca] || []).push({ gf: String(sa), ga: String(sb) });
+        if (cb) (groupAcc[cb] = groupAcc[cb] || []).push({ gf: String(sb), ga: String(sa) });
+      }
+    } else {
+      [ca, cb].forEach((c) => { if (c) (fixtures[c] = fixtures[c] || new Set()).add(round); });
+      if (completed) {
+        if (Number.isFinite(sa) && Number.isFinite(sb)) {
+          if (ca) { koGoals[ca] = koGoals[ca] || { gf: 0, ga: 0 }; koGoals[ca].gf += sa; koGoals[ca].ga += sb; }
+          if (cb) { koGoals[cb] = koGoals[cb] || { gf: 0, ga: 0 }; koGoals[cb].gf += sb; koGoals[cb].ga += sa; }
+        }
+        const w = cs.find((x) => x.winner === true);
+        const wc = w ? resolveCode(w.team) : null;
+        if (round === "FINAL" && wc) finalWinner = wc;
+        if (round === "THIRD" && wc) thirdWinner = wc;
+      }
+    }
+  }
+
+  const RANK = { R32: 1, R16: 2, QF: 3, SF: 4 };
+  const LAB = { 1: "R32", 2: "R16", 3: "QF", 4: "SF" };
+  const out = {};
+  Object.keys(TEAMS).forEach((code) => {
+    const g = [{ gf: "", ga: "" }, { gf: "", ga: "" }, { gf: "", ga: "" }];
+    (groupAcc[code] || []).slice(0, 3).forEach((m, i) => { g[i] = m; });
+    let stage = "GROUP";
+    const fx = fixtures[code];
+    if (fx) {
+      if (fx.has("FINAL")) stage = finalWinner === code ? "CHAMPION" : "FINAL";
+      else if (fx.has("THIRD")) stage = thirdWinner === code ? "THIRD" : "SF";
+      else {
+        let mx = 0;
+        ["R32", "R16", "QF", "SF"].forEach((r) => { if (fx.has(r) && RANK[r] > mx) mx = RANK[r]; });
+        stage = mx ? LAB[mx] : "GROUP";
+      }
+    }
+    const kg = koGoals[code] || { gf: 0, ga: 0 };
+    out[code] = { g, stage, koGF: kg.gf, koGA: kg.ga };
+  });
+  return out;
+}
+
+async function syncFromESPN() {
+  const res = await fetch(ESPN_URL, { headers: { accept: "application/json" } });
+  if (!res.ok) throw new Error("ESPN responded " + res.status);
+  return parseEvents(await res.json());
+}
+
+/* ------------------------------------------------------------------ */
+/*  SCORING                                                            */
+/* ------------------------------------------------------------------ */
+
+const blankResult = () => ({
+  g: [{ gf: "", ga: "" }, { gf: "", ga: "" }, { gf: "", ga: "" }],
+  stage: "GROUP",
+  koGF: 0,
+  koGA: 0,
+});
+
+function num(v) {
+  const n = parseInt(v, 10);
+  return Number.isFinite(n) ? n : null;
+}
+
+function teamScore(res, tier) {
+  const r = res || blankResult();
+  const w = WIN_PTS[tier] || 3;
+  let pts = 0, gf = 0, ga = 0, wins = 0, draws = 0, losses = 0, cleanSheets = 0, played = 0;
+
+  r.g.forEach((m) => {
+    const a = num(m.gf), b = num(m.ga);
+    if (a === null || b === null) return;
+    played += 1; gf += a; ga += b;
+    if (b === 0) cleanSheets += 1;
+    if (a > b) { wins += 1; pts += w; }
+    else if (a === b) { draws += 1; pts += 1; } // draw point: group stage only
+    else { losses += 1; }
+  });
+
+  const koWins = KO_WINS[r.stage] || 0;
+  pts += koWins * w;                       // knockout wins, tier-weighted
+  pts += ROUND_BONUS[r.stage] || 0;        // round-reached bonus
+  if (r.stage !== "GROUP") pts += REACH_KO_BONUS; // breadth: made the knockouts
+  pts += PLACEMENT_BONUS[r.stage] || 0;    // finals placement
+
+  gf += r.koGF || 0;
+  ga += r.koGA || 0;
+
+  return { pts, gf, ga, gd: gf - ga, wins: wins + koWins, draws, losses, cleanSheets, played, stage: r.stage };
+}
+
+function managerScore(squad, results) {
+  let pts = 0, gf = 0, ga = 0, cleanSheets = 0, wins = 0;
+  squad.forEach((code) => {
+    const s = teamScore(results[code], TEAMS[code].tier);
+    pts += s.pts; gf += s.gf; ga += s.ga; cleanSheets += s.cleanSheets; wins += s.wins;
+  });
+  return { pts, gf, ga, gd: gf - ga, cleanSheets, wins };
+}
+
+/* ------------------------------------------------------------------ */
+/*  PERSISTENCE                                                        */
+/* ------------------------------------------------------------------ */
+
+const STORE_KEY = "legacy-league-v1";
+
+async function loadData() {
+  try {
+    const r = localStorage.getItem(STORE_KEY);
+    if (r) return JSON.parse(r);
+  } catch (e) {}
+  return null;
+}
+async function saveData(data) {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch (e) {}
+}
+
+/* ------------------------------------------------------------------ */
+/*  SMALL UI PIECES                                                    */
+/* ------------------------------------------------------------------ */
+
+const C = {
+  bg: "#0a0f1c",
+  bg2: "#0d1424",
+  card: "#111a2c",
+  cardHi: "#16223a",
+  border: "rgba(255,255,255,0.07)",
+  gold: "#d4a017",
+  goldBright: "#e8be4a",
+  text: "#e9eef7",
+  mut: "#8492a8",
+  mut2: "#5f6e85",
+};
+
+function Flag({ code, size = 22 }) {
+  const t = TEAMS[code];
+  return <span style={{ fontSize: size, lineHeight: 1 }} title={t?.name}>{t?.flag}</span>;
+}
+
+function TierPill({ tier, small }) {
+  const m = TIER_META[tier];
+  return (
+    <span style={{
+      display: "inline-flex", alignItems: "center", gap: 6,
+      border: `1px solid ${m.color}`, color: m.color, background: m.bg,
+      borderRadius: 999, padding: small ? "1px 9px" : "3px 12px",
+      fontSize: small ? 11 : 12, fontWeight: 700, letterSpacing: 0.3, whiteSpace: "nowrap",
+    }}>{`Tier ${tier}`}</span>
+  );
+}
+
+function Card({ children, style }) {
+  return (
+    <div style={{
+      background: C.card, border: `1px solid ${C.border}`, borderRadius: 16,
+      padding: 18, ...style,
+    }}>{children}</div>
+  );
+}
+
+function SectionTitle({ icon, children }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
+      {icon && <span style={{ fontSize: 20 }}>{icon}</span>}
+      <h3 style={{
+        margin: 0, color: C.gold, fontSize: 14, fontWeight: 800,
+        letterSpacing: 1.2, textTransform: "uppercase",
+      }}>{children}</h3>
+    </div>
+  );
+}
+
+function ManagerNames({ i, size = 13, gap = 2 }) {
+  const m = MANAGERS[i] || {};
+  return (
+    <div style={{ display: "grid", gap }}>
+      {DIVISIONS.map((d) => (
+        <div key={d.key} style={{ display: "flex", alignItems: "center", gap: 7 }}>
+          <span style={{ width: 7, height: 7, borderRadius: 99, background: d.color, flexShrink: 0 }} />
+          <span style={{ color: d.color, fontSize: size, fontWeight: 700 }}>{m[d.key]}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  TABS                                                               */
+/* ------------------------------------------------------------------ */
+
+function RulesTab() {
+  const body = { color: C.mut, fontSize: 14.5, lineHeight: 1.6, margin: 0 };
+  return (
+    <div style={{ display: "grid", gap: 14 }}>
+      <Card style={{ textAlign: "center", padding: 26 }}>
+        <div style={{ fontSize: 40 }}>🌍</div>
+        <h2 style={{ color: C.gold, margin: "10px 0 8px", letterSpacing: 1, fontSize: 22 }}>HOW IT WORKS</h2>
+        <p style={{ ...body, maxWidth: 460, margin: "0 auto" }}>
+          A tiered fantasy league for World Cup 2026. Every manager gets a fair mix — then it's down to the football.
+        </p>
+      </Card>
+
+      <Card>
+        <SectionTitle icon="🎯">The Draw</SectionTitle>
+        <p style={body}>
+          Before the tournament, all 12 managers take part in a randomised tiered draw. The 48 qualified
+          nations are split into 4 tiers by pre-tournament betting odds. Each manager is randomly assigned
+          one team from each tier — giving everyone one favourite, one contender, one dark horse, and one long shot.
+        </p>
+      </Card>
+
+      <Card>
+        <SectionTitle icon="🏅">Your Squad</SectionTitle>
+        <p style={body}>
+          Each manager ends up with exactly 4 national teams. Your teams' results across the entire World Cup —
+          group stage through to the final — all count toward your score.
+        </p>
+      </Card>
+
+      <Card>
+        <SectionTitle icon="📊">Scoring</SectionTitle>
+        <p style={body}>
+          Win values reward underdogs: a win is worth <b style={{ color: C.text }}>3pts</b> for a
+          Tier 1 or 2 team and <b style={{ color: C.text }}>5pts</b> for a Tier 3 or 4 team — in every round.
+          Group-stage draws earn <b style={{ color: C.text }}>1pt</b>. Reaching the knockouts is worth
+          <b style={{ color: C.text }}> +3pts</b> per team, then each further round adds a bonus:
+          R16 +2, QF +4, SF +6, Final +8.
+        </p>
+      </Card>
+
+      <Card>
+        <SectionTitle icon="🏆">Placement Bonuses</SectionTitle>
+        <p style={body}>
+          Tournament finishers earn bonuses: the World Cup winner's manager gets <b style={{ color: C.text }}>+8pts</b>,
+          runner-up <b style={{ color: C.text }}>+4pts</b>, and 3rd place <b style={{ color: C.text }}>+2pts</b>.
+        </p>
+      </Card>
+
+      <Card>
+        <SectionTitle icon="🔢">Tiebreakers</SectionTitle>
+        <p style={body}>
+          If managers are level on points: (1) goal difference across all 4 teams, (2) total goals scored,
+          (3) total clean sheets, and (4) Harrison flips a coin.
+        </p>
+      </Card>
+
+      <Card>
+        <SectionTitle>The Four Tiers</SectionTitle>
+        <div style={{ display: "grid", gap: 12 }}>
+          {[1, 2, 3, 4].map((t) => (
+            <div key={t} style={{
+              display: "flex", alignItems: "center", gap: 14,
+              borderTop: t === 1 ? "none" : `1px solid ${C.border}`, paddingTop: t === 1 ? 0 : 12,
+            }}>
+              <TierPill tier={t} />
+              <div>
+                <div style={{ color: C.text, fontWeight: 700, fontSize: 15 }}>{TIER_META[t].name}</div>
+                <div style={{ color: C.mut2, fontSize: 13 }}>
+                  Odds {TIER_META[t].odds}.{t === 4 ? " Zero pressure, maximum chaos." : ""}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
+function DrawTab() {
+  return (
+    <div style={{ display: "grid", gap: 12 }}>
+      <SectionTitle>Draw Tracker</SectionTitle>
+      {SQUADS.map((squad, i) => (
+        <Card key={i} style={{ padding: 14 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
+            <div style={{ color: C.mut2, fontSize: 11, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase", paddingTop: 2 }}>
+              Group {i + 1}
+            </div>
+            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
+              {squad.map((code) => {
+                const m = TIER_META[TEAMS[code].tier];
+                return (
+                  <div key={code} style={{
+                    display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
+                    width: 52, padding: "6px 4px", borderRadius: 10,
+                    background: C.bg2, border: `1px solid ${m.color}55`,
+                  }}>
+                    <Flag code={code} size={19} />
+                    <span style={{ color: C.mut, fontSize: 10, fontWeight: 700 }}>{code}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+          <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${C.border}` }}>
+            <ManagerNames i={i} />
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function TeamsTab() {
+  return (
+    <div style={{ display: "grid", gap: 12 }}>
+      <SectionTitle icon="👥">Squads</SectionTitle>
+      {SQUADS.map((squad, i) => {
+        const sorted = [...squad].sort((a, b) => TEAMS[a].tier - TEAMS[b].tier);
+        return (
+          <Card key={i} style={{ padding: 16 }}>
+            <div style={{ color: C.mut2, fontSize: 11, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>
+              Group {i + 1}
+            </div>
+            <div style={{ marginBottom: 10 }}><ManagerNames i={i} /></div>
+            {sorted.map((code, idx) => (
+              <div key={code} style={{
+                display: "flex", alignItems: "center", gap: 10,
+                padding: "9px 0", borderTop: `1px solid ${C.border}`,
+              }}>
+                <Flag code={code} size={20} />
+                <span style={{ flex: 1, color: C.text, fontSize: 14.5, fontWeight: 600 }}>{TEAMS[code].name}</span>
+                <TierPill tier={TEAMS[code].tier} small />
+              </div>
+            ))}
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
+
+function TiersTab() {
+  return (
+    <div style={{ display: "grid", gap: 14 }}>
+      <SectionTitle>The Four Tiers</SectionTitle>
+      {[1, 2, 3, 4].map((tier) => (
+        <Card key={tier}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+            <TierPill tier={tier} />
+            <div>
+              <div style={{ color: C.text, fontWeight: 700, fontSize: 16 }}>{TIER_META[tier].name}</div>
+              <div style={{ color: C.mut2, fontSize: 12.5 }}>Odds {TIER_META[tier].odds}</div>
+            </div>
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {Object.keys(TEAMS).filter((c) => TEAMS[c].tier === tier).map((code) => (
+              <span key={code} style={{
+                display: "inline-flex", alignItems: "center", gap: 6,
+                background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 8,
+                padding: "5px 10px", color: C.text, fontSize: 13,
+              }}>
+                <Flag code={code} size={16} />{TEAMS[code].name}
+              </span>
+            ))}
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function StandingsTab({ results }) {
+  const [div, setDiv] = useState("gold");
+  const divColor = DIV_COLOR[div];
+
+  const rows = useMemo(() => {
+    return SQUADS.map((squad, i) => ({
+      i, squad, ...managerScore(squad, results),
+    })).sort((a, b) =>
+      b.pts - a.pts || b.gd - a.gd || b.gf - a.gf || b.cleanSheets - a.cleanSheets
+    );
+  }, [results]);
+
+  const medal = ["🥇", "🥈", "🥉"];
+  return (
+    <div style={{ display: "grid", gap: 10 }}>
+      <SectionTitle icon="📊">Standings</SectionTitle>
+
+      {/* Division toggle */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 6 }}>
+        {DIVISIONS.map((d) => {
+          const active = div === d.key;
+          return (
+            <button key={d.key} onClick={() => setDiv(d.key)} style={{
+              background: active ? `${d.color}22` : "transparent",
+              border: `1px solid ${active ? d.color : C.border}`,
+              color: active ? d.color : C.mut, borderRadius: 10, padding: "8px 4px",
+              fontSize: 11.5, fontWeight: 800, letterSpacing: 0.2, lineHeight: 1.15, cursor: "pointer",
+            }}>{d.label}</button>
+          );
+        })}
+      </div>
+      <div style={{ color: C.mut2, fontSize: 12, marginBottom: 2 }}>
+        {DIVISIONS.find((d) => d.key === div).label} league · same draw, same scores — tiebreak: GD → goals → clean sheets.
+      </div>
+
+      {rows.map((r, rank) => (
+        <Card key={r.i} style={{ padding: 14, borderColor: rank === 0 ? `${divColor}66` : C.border }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 30, textAlign: "center", fontSize: rank < 3 ? 20 : 15, color: C.mut, fontWeight: 700 }}>
+              {medal[rank] || rank + 1}
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ color: divColor, fontWeight: 700, fontSize: 15 }}>{MANAGERS[r.i][div]}</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "3px 10px", marginTop: 6, fontSize: 12, color: C.mut }}>
+                <span style={{ color: C.mut2, fontWeight: 700 }}>G{r.i + 1}</span>
+                {r.squad.map((c) => (
+                  <span key={c} style={{ whiteSpace: "nowrap" }}>
+                    <Flag code={c} size={13} /> {TEAMS[c].name}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ color: divColor, fontWeight: 800, fontSize: 22, lineHeight: 1 }}>{r.pts}</div>
+              <div style={{ color: C.mut2, fontSize: 11 }}>pts</div>
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 14, marginTop: 8, color: C.mut2, fontSize: 11.5 }}>
+            <span>GD {r.gd >= 0 ? "+" : ""}{r.gd}</span>
+            <span>GF {r.gf}</span>
+            <span>Wins {r.wins}</span>
+            <span>CS {r.cleanSheets}</span>
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function ScoreInput({ value, onChange }) {
+  return (
+    <input
+      inputMode="numeric" value={value} onChange={(e) => onChange(e.target.value.replace(/[^0-9]/g, "").slice(0, 2))}
+      style={{
+        width: 34, textAlign: "center", background: C.bg, color: C.text,
+        border: `1px solid ${C.border}`, borderRadius: 7, padding: "6px 0", fontSize: 14,
+      }}
+    />
+  );
+}
+
+function WCTab({ results, editTeam, resetTeam, overrides }) {
+  const [open, setOpen] = useState(0);
+
+  return (
+    <div style={{ display: "grid", gap: 12 }}>
+      <SectionTitle icon="🌍">World Cup Tracker</SectionTitle>
+      <div style={{ color: C.mut2, fontSize: 12.5, marginTop: -4 }}>
+        Scores sync automatically from ESPN. Edit a team only to override the feed — tap Reset to hand it back to auto-sync.
+      </div>
+
+      {SQUADS.map((squad, i) => {
+        const mScore = managerScore(squad, results);
+        const isOpen = open === i;
+        return (
+          <Card key={i} style={{ padding: 0, overflow: "hidden" }}>
+            <button onClick={() => setOpen(isOpen ? -1 : i)} style={{
+              width: "100%", textAlign: "left", background: "transparent", border: "none",
+              padding: 16, cursor: "pointer", display: "flex", alignItems: "center", gap: 10,
+            }}>
+              <span style={{ flex: 1, color: C.text, fontWeight: 700, fontSize: 15 }}>
+                Group {i + 1}
+              </span>
+              <span style={{ display: "flex", gap: 5 }}>{squad.map((c) => <Flag key={c} code={c} size={16} />)}</span>
+              <span style={{ color: C.goldBright, fontWeight: 800, fontSize: 17, minWidth: 36, textAlign: "right" }}>{mScore.pts}</span>
+              <span style={{ color: C.mut2, fontSize: 13, transform: isOpen ? "rotate(90deg)" : "none", transition: "transform .15s" }}>›</span>
+            </button>
+
+            {isOpen && (
+              <div style={{ padding: "0 16px 16px" }}>
+                <div style={{
+                  background: C.bg2, border: `1px solid ${C.border}`, borderRadius: 10,
+                  padding: "10px 12px", marginBottom: 12,
+                }}>
+                  <ManagerNames i={i} />
+                </div>
+                {squad.map((code) => {
+                  const res = results[code] || blankResult();
+                  const s = teamScore(res, TEAMS[code].tier);
+                  const overridden = !!overrides[code];
+                  return (
+                    <div key={code} style={{
+                      background: C.bg2, border: `1px solid ${overridden ? C.gold + "66" : C.border}`, borderRadius: 12,
+                      padding: 12, marginBottom: 10,
+                    }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                        <Flag code={code} size={20} />
+                        <span style={{ color: C.text, fontWeight: 600, fontSize: 14, flex: 1 }}>{TEAMS[code].name}</span>
+                        {overridden && (
+                          <button onClick={() => resetTeam(code)} style={{
+                            background: "transparent", border: `1px solid ${C.border}`, color: C.mut,
+                            borderRadius: 7, padding: "3px 8px", fontSize: 11, cursor: "pointer",
+                          }}>Reset</button>
+                        )}
+                        <TierPill tier={TEAMS[code].tier} small />
+                        <span style={{ color: C.goldBright, fontWeight: 800, fontSize: 15, minWidth: 34, textAlign: "right" }}>{s.pts}p</span>
+                      </div>
+
+                      <div style={{ display: "grid", gap: 7 }}>
+                        {res.g.map((m, gi) => (
+                          <div key={gi} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                            <span style={{ color: C.mut2, fontSize: 12, width: 48 }}>Match {gi + 1}</span>
+                            <ScoreInput value={m.gf} onChange={(v) => editTeam(code, (c) => { c.g[gi].gf = v; })} />
+                            <span style={{ color: C.mut2 }}>–</span>
+                            <ScoreInput value={m.ga} onChange={(v) => editTeam(code, (c) => { c.g[gi].ga = v; })} />
+                          </div>
+                        ))}
+                      </div>
+
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10 }}>
+                        <span style={{ color: C.mut2, fontSize: 12 }}>Reached</span>
+                        <select
+                          value={res.stage}
+                          onChange={(e) => editTeam(code, (c) => { c.stage = e.target.value; })}
+                          style={{
+                            flex: 1, background: C.bg, color: C.text, border: `1px solid ${C.border}`,
+                            borderRadius: 8, padding: "8px 10px", fontSize: 13,
+                          }}
+                        >
+                          {STAGES.map((st) => <option key={st.key} value={st.key}>{st.label}</option>)}
+                        </select>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </Card>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  ROOT                                                               */
+/* ------------------------------------------------------------------ */
+
+const TABS = [
+  { key: "rules",     label: "Rules",     icon: "📋" },
+  { key: "draw",      label: "Draw",      icon: "🎯" },
+  { key: "standings", label: "Standings", icon: "📊" },
+  { key: "teams",     label: "Teams",     icon: "👥" },
+  { key: "tiers",     label: "Tiers",     icon: "🏅" },
+  { key: "wc",        label: "WC",        icon: "🌍" },
+];
+
+function App() {
+  const [tab, setTab] = useState("rules");
+  const [api, setApi] = useState({});          // ESPN-derived results
+  const [overrides, setOverrides] = useState({}); // manual corrections (win over API)
+  const [loaded, setLoaded] = useState(false);
+  const [sync, setSync] = useState({ status: "idle", at: null, msg: "" });
+
+  // Load saved state
+  useEffect(() => {
+    loadData().then((d) => {
+      if (d) {
+        setApi(d.api || {});
+        setOverrides(d.overrides || {});
+        if (d.lastSync) setSync({ status: "idle", at: d.lastSync, msg: "" });
+      }
+      setLoaded(true);
+    });
+  }, []);
+
+  // Persist
+  useEffect(() => {
+    if (loaded) saveData({ api, overrides, lastSync: sync.at });
+  }, [api, overrides, sync.at, loaded]);
+
+  const doSync = React.useCallback(async () => {
+    setSync((s) => ({ ...s, status: "loading" }));
+    try {
+      const data = await syncFromESPN();
+      setApi(data);
+      setSync({ status: "ok", at: Date.now(), msg: "" });
+    } catch (e) {
+      setSync((s) => ({ status: "error", at: s.at, msg: String(e.message || e) }));
+    }
+  }, []);
+
+  // Auto-sync on load + every 5 minutes
+  useEffect(() => {
+    if (!loaded) return;
+    doSync();
+    const id = setInterval(doSync, 5 * 60 * 1000);
+    return () => clearInterval(id);
+  }, [loaded, doSync]);
+
+  const results = useMemo(() => {
+    const out = {};
+    Object.keys(TEAMS).forEach((c) => { out[c] = overrides[c] || api[c] || blankResult(); });
+    return out;
+  }, [api, overrides]);
+
+  const editTeam = (code, fn) => setOverrides((prev) => {
+    const base = prev[code] || api[code] || blankResult();
+    const copy = JSON.parse(JSON.stringify(base));
+    fn(copy);
+    return { ...prev, [code]: copy };
+  });
+  const resetTeam = (code) => setOverrides((prev) => {
+    const n = { ...prev }; delete n[code]; return n;
+  });
+
+  const syncColor = { idle: C.mut, loading: C.mut, ok: "#3f9c5b", error: "#c2547f" }[sync.status];
+  const syncText = sync.status === "loading" ? "Syncing from ESPN…"
+    : sync.status === "error" ? "Couldn't reach ESPN — using saved data"
+    : sync.at ? `Synced ${new Date(sync.at).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`
+    : "Not synced yet";
+
+  return (
+    <div style={{
+      minHeight: "100vh", background: `radial-gradient(1200px 600px at 50% -10%, ${C.bg2}, ${C.bg})`,
+      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", color: C.text,
+    }}>
+      <div style={{ maxWidth: 560, margin: "0 auto", padding: "20px 16px 60px" }}>
+        {/* Header */}
+        <div style={{ textAlign: "center", paddingBottom: 14, borderBottom: `1px solid ${C.gold}55`, marginBottom: 14 }}>
+          <div style={{ fontSize: 24, letterSpacing: 4 }}>🏆 🌍 ⚽</div>
+          <h1 style={{
+            color: C.gold, margin: "8px 0 4px", fontSize: 30, fontWeight: 900, letterSpacing: 2,
+          }}>THE LEGACY LEAGUE</h1>
+          <div style={{ color: C.mut, fontSize: 11, letterSpacing: 3, fontWeight: 600 }}>
+            WORLD CUP 2026 · FANTASY FOOTBALL DRAFT
+          </div>
+        </div>
+
+        {/* Sync bar */}
+        <div style={{
+          display: "flex", alignItems: "center", gap: 10, marginBottom: 16,
+          background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: "9px 12px",
+        }}>
+          <span style={{ width: 8, height: 8, borderRadius: 99, background: syncColor, flexShrink: 0 }} />
+          <span style={{ flex: 1, color: C.mut, fontSize: 12.5 }}>{syncText}</span>
+          <button onClick={doSync} disabled={sync.status === "loading"} style={{
+            background: "transparent", border: `1px solid ${C.gold}66`, color: C.goldBright,
+            borderRadius: 8, padding: "5px 12px", fontSize: 12.5, fontWeight: 700,
+            cursor: sync.status === "loading" ? "default" : "pointer", opacity: sync.status === "loading" ? 0.5 : 1,
+          }}>Sync now</button>
+        </div>
+
+        {/* Tabs */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 4, marginBottom: 20 }}>
+          {TABS.map((t) => {
+            const active = tab === t.key;
+            return (
+              <button key={t.key} onClick={() => setTab(t.key)} style={{
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+                background: active ? C.cardHi : "transparent",
+                border: "none", borderBottom: active ? `2px solid ${C.gold}` : "2px solid transparent",
+                borderRadius: 8, padding: "9px 2px", cursor: "pointer",
+                color: active ? C.gold : C.mut, fontWeight: active ? 800 : 600,
+              }}>
+                <span style={{ fontSize: 17 }}>{t.icon}</span>
+                <span style={{ fontSize: 10.5, letterSpacing: 0.5, textTransform: "uppercase" }}>{t.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {tab === "rules" && <RulesTab />}
+        {tab === "draw" && <DrawTab />}
+        {tab === "standings" && <StandingsTab results={results} />}
+        {tab === "teams" && <TeamsTab />}
+        {tab === "tiers" && <TiersTab />}
+        {tab === "wc" && (
+          <WCTab results={results} editTeam={editTeam} resetTeam={resetTeam} overrides={overrides} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script></body></html>
