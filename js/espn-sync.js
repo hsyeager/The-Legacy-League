@@ -39,6 +39,13 @@ function resolveCode(team) {
   return null;
 }
 
+function broadcastInfo(comp) {
+  const geo = comp.geoBroadcasts || [];
+  const tv = geo.find((b) => b.type?.shortName === "TV");
+  const stream = geo.find((b) => b.type?.shortName === "STREAMING");
+  return { tv: tv?.media?.shortName || null, stream: stream?.media?.shortName || null };
+}
+
 function classifyLabel(label) {
   const l = String(label || "").toLowerCase();
   if (l.includes("group")) return "GROUP";
@@ -92,10 +99,12 @@ function parseEvents(json) {
     pushLog(cb, A.team, ca, sb, sa, B.winner);
 
     const hasStarted = completed || isLive;
+    const { tv, stream } = broadcastInfo(comp);
     schedule.push({
       date: ev.date, round,
       completed: !!completed && haveScore,
       gameTime: gameTime && isLive ? gameTime : null,
+      tv, stream,
       home: { code: ca, name: nameOf(A.team, ca), score: hasStarted && haveScore ? sa : null, win: A.winner === true },
       away: { code: cb, name: nameOf(B.team, cb), score: hasStarted && haveScore ? sb : null, win: B.winner === true },
     });
