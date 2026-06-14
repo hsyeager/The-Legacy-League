@@ -1,8 +1,8 @@
 const TABS = [
   { key: "standings", label: "Standings",      icon: "📊" },
-  { key: "points",    label: "Results by Nation", icon: "⚽" },
-  { key: "tournament", label: "Tournament",    icon: "🏆" },
   { key: "gamelog",  label: "Game Log",        icon: "📅" },
+  { key: "tournament", label: "Tournament",    icon: "🏆" },
+  { key: "points",    label: "Results by Nation", icon: "⚽" },
   { key: "rules",     label: "Rules",          icon: "📋" },
 ];
 

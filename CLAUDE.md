@@ -123,3 +123,7 @@ banners). Listed in load order:
 - When adding a shared row/list UI for a team, prefer extending `TeamRow` (`js/ui.js`) over duplicating markup in
   a tab — both `PointsTab` and `StandingsTab`'s expanded squad dropdown already share it via the `"card"`/`"list"`
   variants.
+- Each `<script src="js/...">` tag in `index.html` has a `?v=YYYYMMDDHHMM` cache-busting query string (GitHub
+  Pages doesn't support custom `Cache-Control` headers). Whenever any file under `js/` changes, bump all seven
+  `?v=` values to the current date and time (e.g. via `date +%Y%m%d%H%M`) so browsers don't serve stale cached
+  scripts, even across multiple updates in the same day.
