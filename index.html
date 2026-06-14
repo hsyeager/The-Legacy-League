@@ -2,7 +2,23 @@
 <html lang="en"><head>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <title>The Legacy League · World Cup 2026</title>
-<style>html,body{margin:0;padding:0;background:#0a0f1c}*{box-sizing:border-box}#boot{color:#8492a8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;text-align:center;padding:60px 20px;font-size:14px}@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}</style>
+<style>
+html,body{margin:0;padding:0;background:#0a0f1c}
+*{box-sizing:border-box}
+#boot{color:#8492a8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;text-align:center;padding:60px 20px;font-size:14px}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+
+/* Responsive container and spacing */
+@media (max-width: 480px) {
+  #root { --pad: 12px; --gap-sm: 8px; --gap-lg: 10px; --h1: 24px; --h3: 13px; --text: 13px; }
+}
+@media (min-width: 481px) and (max-width: 768px) {
+  #root { --pad: 16px; --gap-sm: 10px; --gap-lg: 12px; --h1: 28px; --h3: 14px; --text: 14px; }
+}
+@media (min-width: 769px) {
+  #root { --pad: 20px; --gap-sm: 12px; --gap-lg: 16px; --h1: 32px; --h3: 15px; --text: 15px; }
+}
+</style>
 <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -466,10 +482,11 @@ function TierPill({ tier, small }) {
 }
 
 function Card({ children, style }) {
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 481;
   return (
     <div style={{
-      background: C.card, border: `1px solid ${C.border}`, borderRadius: 16,
-      padding: 18, ...style,
+      background: C.card, border: `1px solid ${C.border}`, borderRadius: 14,
+      padding: isMobile ? 8 : 18, ...style,
     }}>{children}</div>
   );
 }
@@ -832,6 +849,7 @@ function TeamsTab({ api, onSelect }) {
 function StandingsTab({ results }) {
   const [div, setDiv] = useState("gold");
   const divColor = DIV_COLOR[div];
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 481;
 
   const rows = useMemo(() => {
     return SQUADS.map((squad, i) => ({
@@ -847,46 +865,46 @@ function StandingsTab({ results }) {
       <SectionTitle icon="📊">Standings</SectionTitle>
 
       {/* Division toggle */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 6 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: isMobile ? 4 : 6 }}>
         {DIVISIONS.map((d) => {
           const active = div === d.key;
           return (
             <button key={d.key} onClick={() => setDiv(d.key)} style={{
               background: active ? `${d.color}22` : "transparent",
               border: `1px solid ${active ? d.color : C.border}`,
-              color: active ? d.color : C.mut, borderRadius: 10, padding: "8px 4px",
-              fontSize: 11.5, fontWeight: 800, letterSpacing: 0.2, lineHeight: 1.15, cursor: "pointer",
+              color: active ? d.color : C.mut, borderRadius: 8, padding: isMobile ? "6px 3px" : "8px 4px",
+              fontSize: isMobile ? 10.5 : 11.5, fontWeight: 800, letterSpacing: 0.2, lineHeight: 1.15, cursor: "pointer",
             }}>{d.label}</button>
           );
         })}
       </div>
-      <div style={{ color: C.mut2, fontSize: 12, marginBottom: 2 }}>
-        {DIVISIONS.find((d) => d.key === div).label} league · same draw, same scores — tiebreak: GD → goals → clean sheets.
+      <div style={{ color: C.mut2, fontSize: isMobile ? 11 : 12, marginBottom: 2 }}>
+        {DIVISIONS.find((d) => d.key === div).label} league
       </div>
 
       {rows.map((r, rank) => (
-        <Card key={r.i} style={{ padding: 14, borderColor: rank === 0 ? `${divColor}66` : C.border }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ width: 30, textAlign: "center", fontSize: rank < 3 ? 20 : 15, color: C.mut, fontWeight: 700 }}>
+        <Card key={r.i} style={{ padding: isMobile ? 10 : 14, borderColor: rank === 0 ? `${divColor}66` : C.border }}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: isMobile ? 8 : 12 }}>
+            <div style={{ width: isMobile ? 24 : 30, textAlign: "center", fontSize: rank < 3 ? (isMobile ? 18 : 20) : (isMobile ? 13 : 15), color: C.mut, fontWeight: 700, flexShrink: 0 }}>
               {medal[rank] || rank + 1}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ color: divColor, fontWeight: 700, fontSize: 15 }}>{MANAGERS[r.i][div]}</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "3px 10px", marginTop: 6, fontSize: 12, color: C.mut }}>
+              <div style={{ color: divColor, fontWeight: 700, fontSize: isMobile ? 13 : 15 }}>{MANAGERS[r.i][div]}</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: isMobile ? "2px 6px" : "3px 10px", marginTop: 4, fontSize: isMobile ? 11 : 12, color: C.mut }}>
                 <span style={{ color: C.mut2, fontWeight: 700 }}>G{r.i + 1}</span>
                 {r.squad.map((c) => (
-                  <span key={c} style={{ whiteSpace: "nowrap" }}>
-                    <Flag code={c} size={13} /> {TEAMS[c].name}
+                  <span key={c} style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    <Flag code={c} size={isMobile ? 11 : 13} /> {isMobile ? c : TEAMS[c].name}
                   </span>
                 ))}
               </div>
             </div>
-            <div style={{ textAlign: "right" }}>
-              <div style={{ color: divColor, fontWeight: 800, fontSize: 22, lineHeight: 1 }}>{r.pts}</div>
-              <div style={{ color: C.mut2, fontSize: 11 }}>pts</div>
+            <div style={{ textAlign: "right", flexShrink: 0 }}>
+              <div style={{ color: divColor, fontWeight: 800, fontSize: isMobile ? 18 : 22, lineHeight: 1 }}>{r.pts}</div>
+              <div style={{ color: C.mut2, fontSize: 10 }}>pts</div>
             </div>
           </div>
-          <div style={{ display: "flex", gap: 14, marginTop: 8, color: C.mut2, fontSize: 11.5 }}>
+          <div style={{ display: "flex", gap: isMobile ? 10 : 14, marginTop: 6, color: C.mut2, fontSize: isMobile ? 10 : 11.5, flexWrap: "wrap" }}>
             <span>GD {r.gd >= 0 ? "+" : ""}{r.gd}</span>
             <span>GF {r.gf}</span>
             <span>Wins {r.wins}</span>
@@ -939,6 +957,7 @@ function TeamOwners({ code, align }) {
 }
 
 function MatchRow({ m }) {
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 481;
   const dt = (() => {
     try {
       return new Date(m.date).toLocaleString("en-US", {
@@ -950,49 +969,51 @@ function MatchRow({ m }) {
   const isLive = hasScore && !m.completed;
   const Side = ({ s, right }) => (
     <div style={{
-      flex: 1, display: "flex", alignItems: "center", gap: 6, minWidth: 0,
+      flex: 1, display: "flex", alignItems: "center", gap: isMobile ? 4 : 6, minWidth: 0,
       justifyContent: right ? "flex-end" : "flex-start",
-      color: (m.completed || isLive) && s.win ? C.text : C.mut, fontWeight: (m.completed || isLive) && s.win ? 800 : 600, fontSize: 13,
+      color: (m.completed || isLive) && s.win ? C.text : C.mut, fontWeight: (m.completed || isLive) && s.win ? 800 : 600, fontSize: isMobile ? 12 : 13,
     }}>
-      {right && <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "right" }}>{s.name}</span>}
-      {s.code ? <Flag code={s.code} size={16} /> : <span style={{ fontSize: 14 }}>•</span>}
-      {!right && <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{s.name}</span>}
+      {right && <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "right", fontSize: isMobile ? 11 : "inherit" }}>{isMobile ? s.name.substring(0, 3) : s.name}</span>}
+      {s.code ? <Flag code={s.code} size={isMobile ? 14 : 16} /> : <span style={{ fontSize: isMobile ? 12 : 14 }}>•</span>}
+      {!right && <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: isMobile ? 11 : "inherit" }}>{isMobile ? s.name.substring(0, 3) : s.name}</span>}
     </div>
   );
   const hasStarted = hasScore;
   return (
-    <Card style={{ padding: 12, borderColor: isLive ? `${C.goldBright}44` : hasStarted ? undefined : "rgba(255,255,255,0.03)" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-        <span style={{ color: C.gold, fontSize: 11, fontWeight: 800, letterSpacing: 0.5 }}>
-          Match {m.matchNo} <span style={{ color: C.mut2, fontWeight: 600 }}>· {ROUND_LABEL[m.round] || ""}</span>
+    <Card style={{ padding: isMobile ? 10 : 12, borderColor: isLive ? `${C.goldBright}44` : hasStarted ? undefined : "rgba(255,255,255,0.03)" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, flexWrap: "wrap", gap: 4 }}>
+        <span style={{ color: C.gold, fontSize: isMobile ? 10 : 11, fontWeight: 800, letterSpacing: 0.3 }}>
+          {isMobile ? `M${m.matchNo}` : `Match ${m.matchNo}`} <span style={{ color: C.mut2, fontWeight: 600, fontSize: isMobile ? 9 : "inherit" }}>· {isMobile ? ROUND_LABEL[m.round]?.split(" ")[0] || "" : ROUND_LABEL[m.round] || ""}</span>
         </span>
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-          {isLive && <span style={{ width: 6, height: 6, borderRadius: 99, background: "#ff6b6b", animation: "pulse 1.5s infinite", flexShrink: 0 }} />}
-          <span style={{ color: isLive ? "#ff6b6b" : C.mut2, fontSize: 11, fontWeight: isLive ? 700 : 400 }}>
-            {isLive ? "LIVE" : dt}
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          {isLive && <span style={{ width: 5, height: 5, borderRadius: 99, background: "#ff6b6b", animation: "pulse 1.5s infinite", flexShrink: 0 }} />}
+          <span style={{ color: isLive ? "#ff6b6b" : C.mut2, fontSize: isMobile ? 10 : 11, fontWeight: isLive ? 700 : 400 }}>
+            {isLive ? "LIVE" : (isMobile ? new Date(m.date).toLocaleDateString() : dt)}
           </span>
         </div>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 6 : 8 }}>
         <Side s={m.home} right={false} />
-        <div style={{ flexShrink: 0, minWidth: 46, textAlign: "center" }}>
+        <div style={{ flexShrink: 0, minWidth: isMobile ? 36 : 46, textAlign: "center" }}>
           <span style={{
-            display: "block", fontWeight: 800, fontSize: 14,
+            display: "block", fontWeight: 800, fontSize: isMobile ? 13 : 14,
             color: hasScore ? C.text : C.mut2,
           }}>
             {hasScore ? `${m.home.score}\u2013${m.away.score}` : "vs"}
           </span>
-          {isLive && m.gameTime && <span style={{ display: "block", color: "#ff6b6b", fontSize: 10, fontWeight: 700, marginTop: 2 }}>
+          {isLive && m.gameTime && <span style={{ display: "block", color: "#ff6b6b", fontSize: 9, fontWeight: 700, marginTop: 1 }}>
             {m.gameTime}
           </span>}
         </div>
         <Side s={m.away} right={true} />
       </div>
-      <div style={{ display: "flex", alignItems: "flex-start", gap: 8, marginTop: 6 }}>
-        <div style={{ flex: 1, minWidth: 0 }}><TeamOwners code={m.home.code} align="flex-start" /></div>
-        <span style={{ flexShrink: 0, width: 46 }} />
-        <div style={{ flex: 1, minWidth: 0 }}><TeamOwners code={m.away.code} align="flex-end" /></div>
-      </div>
+      {!isMobile && (
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 8, marginTop: 6 }}>
+          <div style={{ flex: 1, minWidth: 0 }}><TeamOwners code={m.home.code} align="flex-start" /></div>
+          <span style={{ flexShrink: 0, width: 46 }} />
+          <div style={{ flex: 1, minWidth: 0 }}><TeamOwners code={m.away.code} align="flex-end" /></div>
+        </div>
+      )}
     </Card>
   );
 }
@@ -1082,45 +1103,106 @@ function TournamentTab({ api, schedule }) {
     });
   }, [api]);
 
-  const GroupTable = ({ standings, groupNum }) => (
-    <Card>
-      <div style={{ color: C.mut2, fontSize: 11, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase", marginBottom: 10 }}>
-        Group {groupNum}
-      </div>
-      <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, color: C.text }}>
-          <thead>
-            <tr style={{ borderBottom: `1px solid ${C.border}` }}>
-              {["", "Team", "P", "W", "D", "L", "GF", "GA", "GD", "Pts"].map((h) => (
-                <th key={h} style={{ padding: "6px 8px", textAlign: h === "Team" ? "left" : "center", color: C.mut2, fontWeight: 700, fontSize: 11 }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {standings.map((t, idx) => {
-              const qual = t.pos === 1 || t.pos === 2 ? "#46a865" : C.text;
-              return (
-                <tr key={t.code} style={{ borderTop: `1px solid ${C.border}`, background: idx < 2 ? "rgba(70,168,101,0.05)" : "transparent" }}>
-                  <td style={{ padding: "6px 8px", textAlign: "center", color: qual, fontWeight: 800, fontSize: 11 }}>{t.pos || idx + 1}</td>
-                  <td style={{ padding: "6px 8px", display: "flex", alignItems: "center", gap: 6, color: qual }}>
-                    <Flag code={t.code} size={16} />{TEAMS[t.code].name}
-                  </td>
-                  <td style={{ padding: "6px 8px", textAlign: "center" }}>{t.p}</td>
-                  <td style={{ padding: "6px 8px", textAlign: "center" }}>{t.w}</td>
-                  <td style={{ padding: "6px 8px", textAlign: "center" }}>{t.d}</td>
-                  <td style={{ padding: "6px 8px", textAlign: "center" }}>{t.l}</td>
-                  <td style={{ padding: "6px 8px", textAlign: "center" }}>{t.gf}</td>
-                  <td style={{ padding: "6px 8px", textAlign: "center" }}>{t.ga}</td>
-                  <td style={{ padding: "6px 8px", textAlign: "center", color: t.gd >= 0 ? "#46a865" : C.red }}>{t.gd >= 0 ? "+" : ""}{t.gd}</td>
-                  <td style={{ padding: "6px 8px", textAlign: "center", fontWeight: 800, color: C.goldBright }}>{t.pts}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-    </Card>
-  );
+  const GroupTable = ({ standings, groupNum }) => {
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 481;
+    const isTablet = typeof window !== "undefined" && window.innerWidth >= 481 && window.innerWidth < 769;
+
+    // Define grid template columns for each breakpoint
+    // Mobile: [4] | [Team] | [W] | [L] | [GD] | [Pts]
+    // Tablet: [4] | [Team] | [W] | [D] | [L] | [GD] | [Pts]
+    // Desktop: [4] | [Team] | [P] | [W] | [D] | [L] | [GF] | [GA] | [GD] | [Pts]
+    const gridCols = isMobile
+      ? "24px minmax(80px, 1fr) 24px 24px 32px 32px"
+      : isTablet
+      ? "26px minmax(100px, 1fr) 28px 28px 28px 36px 36px"
+      : "30px minmax(120px, 1fr) 30px 30px 30px 30px 30px 30px 36px 40px";
+
+    const fontSize = isMobile ? 11 : isTablet ? 12 : 13;
+    const headerFontSize = isMobile ? 9 : isTablet ? 10 : 11;
+    const headerGap = isMobile ? 1 : isTablet ? 4 : 8;
+    const rowGap = isMobile ? 6 : isTablet ? 8 : 10;
+
+    return (
+      <Card style={{ padding: isMobile ? 10 : 16 }}>
+        <div style={{ color: C.mut2, fontSize: isMobile ? 11 : 12, fontWeight: 800, letterSpacing: 0.5, textTransform: "uppercase", marginBottom: isMobile ? 6 : 10 }}>
+          Group {groupNum}
+        </div>
+
+        {/* Header row */}
+        <div style={{
+          display: "grid",
+          gridTemplateColumns: gridCols,
+          gap: headerGap,
+          alignItems: "center",
+          borderBottom: `1px solid ${C.border}`,
+          paddingBottom: isMobile ? 4 : 6,
+          marginBottom: isMobile ? 4 : 6,
+          color: C.mut2,
+          fontSize: headerFontSize,
+          fontWeight: 700,
+          width: "100%",
+          overflow: "hidden",
+        }}>
+          <div style={{ textAlign: "center" }}>Pos</div>
+          <div style={{ textAlign: "left" }}>Team</div>
+          {!isMobile && !isTablet && <div style={{ textAlign: "center" }}>P</div>}
+          <div style={{ textAlign: "center" }}>W</div>
+          {!isMobile && <div style={{ textAlign: "center" }}>D</div>}
+          <div style={{ textAlign: "center" }}>L</div>
+          {!isMobile && !isTablet && <div style={{ textAlign: "center" }}>GF</div>}
+          {!isMobile && !isTablet && <div style={{ textAlign: "center" }}>GA</div>}
+          <div style={{ textAlign: "center" }}>GD</div>
+          <div style={{ textAlign: "center" }}>Pts</div>
+        </div>
+
+        {/* Data rows */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 0, width: "100%", overflow: "hidden" }}>
+          {standings.map((t, idx) => {
+            const qual = t.pos === 1 || t.pos === 2 ? "#46a865" : C.text;
+            const isQualified = idx < 2;
+            return (
+              <div
+                key={t.code}
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: gridCols,
+                  gap: headerGap,
+                  alignItems: "center",
+                  padding: `${isMobile ? 5 : 7}px 0`,
+                  borderTop: `1px solid ${C.border}`,
+                  background: isQualified ? "rgba(70,168,101,0.05)" : "transparent",
+                  fontSize,
+                  color: qual,
+                }}
+              >
+                <div style={{ textAlign: "center", fontWeight: 800, color: qual }}>
+                  {t.pos || idx + 1}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 3 : 5 }}>
+                  <Flag code={t.code} size={isMobile ? 12 : isTablet ? 14 : 16} />
+                  <span style={{ color: qual, fontSize: isMobile ? 10 : 12 }}>
+                    {TEAMS[t.code].name}
+                  </span>
+                </div>
+                {!isMobile && !isTablet && <div style={{ textAlign: "center" }}>{t.p}</div>}
+                <div style={{ textAlign: "center", fontWeight: 600 }}>{t.w}</div>
+                {!isMobile && <div style={{ textAlign: "center", fontWeight: 600 }}>{t.d}</div>}
+                <div style={{ textAlign: "center", fontWeight: 600 }}>{t.l}</div>
+                {!isMobile && !isTablet && <div style={{ textAlign: "center" }}>{t.gf}</div>}
+                {!isMobile && !isTablet && <div style={{ textAlign: "center" }}>{t.ga}</div>}
+                <div style={{ textAlign: "center", fontWeight: 600, color: t.gd >= 0 ? "#46a865" : C.red }}>
+                  {t.gd >= 0 ? "+" : ""}{t.gd}
+                </div>
+                <div style={{ textAlign: "center", fontWeight: 800, color: C.goldBright, fontSize: isMobile ? 12 : 13 }}>
+                  {t.pts}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+    );
+  };
 
   const BracketMatch = ({ match, stage }) => {
     if (!match) return <div style={{ height: 50, border: `1px dashed ${C.border}`, borderRadius: 8, background: "rgba(255,255,255,0.02)" }} />;
@@ -1184,7 +1266,7 @@ function TournamentTab({ api, schedule }) {
   };
 
   return (
-    <div style={{ display: "grid", gap: 16 }}>
+    <div style={{ display: "grid", gap: 16, gridTemplateColumns: "minmax(0, 1fr)" }}>
       <div>
         <SectionTitle icon="🏆">Group Stage Standings</SectionTitle>
         <div style={{ display: "grid", gap: 10 }}>
@@ -1222,6 +1304,7 @@ function App() {
   const [schedule, setSchedule] = useState([]); // full match list
   const [loaded, setLoaded] = useState(false);
   const [sync, setSync] = useState({ status: "idle", at: null, msg: "" });
+  const [width, setWidth] = useState(typeof window !== "undefined" ? window.innerWidth : 1200);
 
   // Load saved state
   useEffect(() => {
@@ -1233,6 +1316,13 @@ function App() {
       }
       setLoaded(true);
     });
+  }, []);
+
+  // Track window width for responsive layout
+  useEffect(() => {
+    const handleResize = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // Persist
@@ -1260,6 +1350,16 @@ function App() {
     return () => clearInterval(id);
   }, [loaded, doSync]);
 
+  // Responsive layout values
+  const isMobile = width < 481;
+  const isTablet = width >= 481 && width < 769;
+  const isDesktop = width >= 769;
+  const containerWidth = isMobile ? "100%" : isTablet ? "95%" : Math.min(560, width - 40);
+  const padding = isMobile ? 8 : isTablet ? 16 : 20;
+  const headerSize = isMobile ? 22 : isTablet ? 26 : 30;
+  const tabCols = isMobile ? 3 : isTablet ? 4 : 6;
+  const gap = isMobile ? 6 : isTablet ? 10 : 12;
+
   const results = useMemo(() => {
     const out = {};
     Object.keys(TEAMS).forEach((c) => { out[c] = api[c] || blankResult(); });
@@ -1277,46 +1377,48 @@ function App() {
       minHeight: "100vh", background: `radial-gradient(1200px 600px at 50% -10%, ${C.bg2}, ${C.bg})`,
       fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", color: C.text,
     }}>
-      <div style={{ maxWidth: 560, margin: "0 auto", padding: "20px 16px 60px" }}>
+      <div style={{ maxWidth: containerWidth, margin: "0 auto", padding: `${padding}px ${padding}px ${padding + 40}px`, transition: "all 0.3s ease" }}>
         {/* Header */}
-        <div style={{ textAlign: "center", paddingBottom: 14, borderBottom: `1px solid ${C.gold}55`, marginBottom: 14 }}>
-          <div style={{ fontSize: 24, letterSpacing: 4 }}>🏆 🌍 ⚽</div>
+        <div style={{ textAlign: "center", paddingBottom: padding, borderBottom: `1px solid ${C.gold}55`, marginBottom: padding }}>
+          <div style={{ fontSize: isMobile ? 20 : isTablet ? 22 : 24, letterSpacing: 3 }}>🏆 🌍 ⚽</div>
           <h1 style={{
-            color: C.gold, margin: "8px 0 4px", fontSize: 30, fontWeight: 900, letterSpacing: 2,
+            color: C.gold, margin: `${padding / 2}px 0 4px`, fontSize: headerSize, fontWeight: 900, letterSpacing: isMobile ? 1 : 2,
           }}>THE LEGACY LEAGUE</h1>
-          <div style={{ color: C.mut, fontSize: 11, letterSpacing: 3, fontWeight: 600 }}>
+          <div style={{ color: C.mut, fontSize: isMobile ? 10 : 11, letterSpacing: 2, fontWeight: 600 }}>
             WORLD CUP 2026 · FANTASY FOOTBALL DRAFT
           </div>
         </div>
 
         {/* Sync bar */}
         <div style={{
-          display: "flex", alignItems: "center", gap: 10, marginBottom: 16,
-          background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: "9px 12px",
+          display: "flex", alignItems: "center", gap: padding / 2, marginBottom: padding,
+          background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: `${padding / 2}px ${padding / 1.5}px`,
+          flexWrap: isMobile ? "wrap" : "nowrap",
         }}>
           <span style={{ width: 8, height: 8, borderRadius: 99, background: syncColor, flexShrink: 0 }} />
-          <span style={{ flex: 1, color: C.mut, fontSize: 12.5 }}>{syncText}</span>
+          <span style={{ flex: 1, color: C.mut, fontSize: isMobile ? 11.5 : 12.5, minWidth: isMobile ? "100%" : "auto" }}>{syncText}</span>
           <button onClick={doSync} disabled={sync.status === "loading"} style={{
             background: "transparent", border: `1px solid ${C.gold}66`, color: C.goldBright,
-            borderRadius: 8, padding: "5px 12px", fontSize: 12.5, fontWeight: 700,
-            cursor: sync.status === "loading" ? "default" : "pointer", opacity: sync.status === "loading" ? 0.5 : 1,
+            borderRadius: 8, padding: `${padding / 2.5}px ${padding / 1.5}px`, fontSize: isMobile ? 11.5 : 12.5, fontWeight: 700,
+            cursor: sync.status === "loading" ? "default" : "pointer", opacity: sync.status === "loading" ? 0.5 : 1, whiteSpace: "nowrap",
           }}>Sync now</button>
         </div>
 
         {/* Tabs */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 4, marginBottom: 20 }}>
+        <div style={{ display: "grid", gridTemplateColumns: `repeat(${tabCols}, 1fr)`, gap: Math.max(2, gap / 3), marginBottom: padding + 4 }}>
           {TABS.map((t) => {
             const active = tab === t.key;
             return (
               <button key={t.key} onClick={() => setTab(t.key)} style={{
-                display: "flex", flexDirection: "column", alignItems: "center", gap: 4,
+                display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
                 background: active ? C.cardHi : "transparent",
                 border: "none", borderBottom: active ? `2px solid ${C.gold}` : "2px solid transparent",
-                borderRadius: 8, padding: "10px 2px", cursor: "pointer",
+                borderRadius: 8, padding: `${padding / 1.5}px 2px`, cursor: "pointer",
                 color: active ? C.gold : C.mut, fontWeight: active ? 800 : 600,
+                fontSize: isMobile ? 10 : 11, transition: "all 0.2s",
               }}>
-                <span style={{ fontSize: 18 }}>{t.icon}</span>
-                <span style={{ fontSize: 11, letterSpacing: 0.3, textTransform: "uppercase", textAlign: "center", lineHeight: 1.1 }}>{t.label}</span>
+                <span style={{ fontSize: isMobile ? 16 : 18 }}>{t.icon}</span>
+                <span style={{ letterSpacing: 0.3, textTransform: "uppercase", textAlign: "center", lineHeight: 1.1, fontSize: isMobile ? 9 : 10 }}>{t.label}</span>
               </button>
             );
           })}
