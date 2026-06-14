@@ -24,9 +24,13 @@ function RulesTab() {
   const [drawOpen, setDrawOpen] = useState(false);
   return (
     <div style={{ display: "grid", gap: 14 }}>
-      <Card style={{ textAlign: "center", padding: 26 }}>
-        <div style={{ fontSize: 40 }}>🌍</div>
-        <h2 style={{ color: C.gold, margin: "10px 0 8px", letterSpacing: 1, fontSize: 22 }}>HOW IT WORKS</h2>
+      <Card style={{ textAlign: "center", padding: 28 }}>
+        <div style={{
+          display: "inline-flex", alignItems: "center", justifyContent: "center",
+          width: 64, height: 64, borderRadius: 18,
+          background: C.goldGrad, boxShadow: SHADOW.gold, fontSize: 32, marginBottom: 12,
+        }}>🌍</div>
+        <h2 style={{ ...goldText, fontFamily: FONT_DISPLAY, fontWeight: 600, margin: "0 0 8px", letterSpacing: 2, fontSize: 24, textTransform: "uppercase" }}>How It Works</h2>
         <p style={{ ...body, maxWidth: 460, margin: "0 auto" }}>
           A tiered fantasy league for World Cup 2026. Every manager gets a fair mix — then it's down to the football.
         </p>
@@ -113,7 +117,7 @@ function RulesTab() {
         {SQUADS.map((squad, i) => (
           <Card key={i} style={{ padding: 14 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 10 }}>
-              <div style={{ color: C.mut2, fontSize: 11, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase", paddingTop: 2 }}>
+              <div style={{ color: C.goldBright, fontFamily: FONT_DISPLAY, fontSize: 11, fontWeight: 600, letterSpacing: 1.5, textTransform: "uppercase", paddingTop: 2 }}>
                 Group {i + 1}
               </div>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
@@ -152,10 +156,10 @@ function TeamsTab({ api, results, onSelect }) {
         return (
           <Card key={i} style={{ padding: 16 }}>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
-              <div style={{ color: C.mut2, fontSize: 11, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase" }}>
+              <div style={{ color: C.goldBright, fontFamily: FONT_DISPLAY, fontSize: 11, fontWeight: 600, letterSpacing: 1.5, textTransform: "uppercase" }}>
                 Group {i + 1}
               </div>
-              <div style={{ color: C.goldBright, fontWeight: 800, fontSize: 14, flexShrink: 0 }}>
+              <div style={{ color: C.goldBright, fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 16, flexShrink: 0 }}>
                 {groupPts} <span style={{ color: C.mut2, fontWeight: 700, fontSize: 10, letterSpacing: 0.5, textTransform: "uppercase" }}>pts</span>
               </div>
             </div>
@@ -198,10 +202,13 @@ function StandingsTab({ results }) {
           const active = div === d.key;
           return (
             <button key={d.key} onClick={() => setDiv(d.key)} style={{
-              background: active ? `${d.color}22` : "transparent",
+              background: active ? `linear-gradient(165deg, ${d.color}33, ${d.color}0d)` : "transparent",
               border: `1px solid ${active ? d.color : C.border}`,
-              color: active ? d.color : C.mut, borderRadius: 8, padding: isMobile ? "6px 3px" : "8px 4px",
-              fontSize: isMobile ? 10.5 : 11.5, fontWeight: 800, letterSpacing: 0.2, lineHeight: 1.15, cursor: "pointer",
+              boxShadow: active ? `0 4px 14px ${d.color}33, ${SHADOW.inset}` : "none",
+              color: active ? d.color : C.mut, borderRadius: 8, padding: isMobile ? "8px 3px" : "10px 4px",
+              fontFamily: FONT_DISPLAY, fontSize: isMobile ? 10.5 : 11.5, fontWeight: active ? 600 : 500,
+              letterSpacing: 0.5, lineHeight: 1.15, cursor: "pointer", textTransform: "uppercase",
+              transition: "all 0.2s",
             }}>{d.label}</button>
           );
         })}
@@ -211,9 +218,13 @@ function StandingsTab({ results }) {
       </div>
 
       {rows.map((r, rank) => (
-        <Card key={r.i} style={{ padding: isMobile ? 10 : 14, borderColor: rank === 0 ? `${divColor}66` : C.border }}>
+        <Card key={r.i} style={{
+          padding: isMobile ? 10 : 14,
+          borderColor: rank === 0 ? `${divColor}66` : C.border,
+          boxShadow: rank === 0 ? `${SHADOW.card}, 0 0 0 1px ${divColor}22, ${SHADOW.inset}` : `${SHADOW.card}, ${SHADOW.inset}`,
+        }}>
           <div style={{ display: "flex", alignItems: "flex-start", gap: isMobile ? 8 : 12 }}>
-            <div style={{ width: isMobile ? 24 : 30, textAlign: "center", fontSize: rank < 3 ? (isMobile ? 18 : 20) : (isMobile ? 13 : 15), color: C.mut, fontWeight: 700, flexShrink: 0 }}>
+            <div style={{ width: isMobile ? 24 : 30, textAlign: "center", fontFamily: FONT_DISPLAY, fontSize: rank < 3 ? (isMobile ? 18 : 20) : (isMobile ? 13 : 15), color: C.mut, fontWeight: 600, flexShrink: 0 }}>
               {medal[rank] || rank + 1}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
@@ -228,8 +239,8 @@ function StandingsTab({ results }) {
               </div>
             </div>
             <div style={{ textAlign: "right", flexShrink: 0 }}>
-              <div style={{ color: divColor, fontWeight: 800, fontSize: isMobile ? 18 : 22, lineHeight: 1 }}>{r.pts}</div>
-              <div style={{ color: C.mut2, fontSize: 10 }}>pts</div>
+              <div style={{ color: divColor, fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: isMobile ? 19 : 23, lineHeight: 1 }}>{r.pts}</div>
+              <div style={{ color: C.mut2, fontSize: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>pts</div>
             </div>
           </div>
           <div style={{ display: "flex", gap: isMobile ? 10 : 14, marginTop: 6, color: C.mut2, fontSize: isMobile ? 10 : 11.5, flexWrap: "wrap" }}>
@@ -285,13 +296,17 @@ function MatchRow({ m }) {
   );
   const hasStarted = hasScore;
   return (
-    <Card style={{ padding: isMobile ? 10 : 12, borderColor: isLive ? `${C.goldBright}44` : hasStarted ? undefined : "rgba(255,255,255,0.03)" }}>
+    <Card style={{
+      padding: isMobile ? 10 : 12,
+      borderColor: isLive ? `${C.live}55` : hasStarted ? undefined : "rgba(255,255,255,0.03)",
+      boxShadow: isLive ? `${SHADOW.card}, 0 0 0 1px ${C.live}22, ${SHADOW.inset}` : `${SHADOW.card}, ${SHADOW.inset}`,
+    }}>
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6, flexWrap: "wrap", gap: 4 }}>
-        <span style={{ color: C.gold, fontSize: isMobile ? 10 : 11, fontWeight: 800, letterSpacing: 0.3 }}>
-          {isMobile ? `M${m.matchNo}` : `Match ${m.matchNo}`} <span style={{ color: C.mut2, fontWeight: 600, fontSize: isMobile ? 9 : "inherit" }}>· {isMobile ? ROUND_LABEL[m.round]?.split(" ")[0] || "" : ROUND_LABEL[m.round] || ""}</span>
+        <span style={{ color: C.goldBright, fontFamily: FONT_DISPLAY, fontSize: isMobile ? 10 : 11, fontWeight: 600, letterSpacing: 0.5, textTransform: "uppercase" }}>
+          {isMobile ? `M${m.matchNo}` : `Match ${m.matchNo}`} <span style={{ color: C.mut2, fontWeight: 500, fontSize: isMobile ? 9 : "inherit" }}>· {isMobile ? ROUND_LABEL[m.round]?.split(" ")[0] || "" : ROUND_LABEL[m.round] || ""}</span>
         </span>
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-          {isLive && <span style={{ width: 5, height: 5, borderRadius: 99, background: C.live, animation: "pulse 1.5s infinite", flexShrink: 0 }} />}
+          {isLive && <span style={{ width: 5, height: 5, borderRadius: 99, background: C.live, boxShadow: `0 0 6px ${C.live}`, animation: "pulse 1.5s infinite", flexShrink: 0 }} />}
           <span style={{ color: isLive ? C.live : C.mut2, fontSize: isMobile ? 10 : 11, fontWeight: isLive ? 700 : 400 }}>
             {isLive ? "LIVE" : (isMobile ? new Date(m.date).toLocaleDateString() : dt)}
           </span>
@@ -299,9 +314,13 @@ function MatchRow({ m }) {
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 6 : 8 }}>
         <Side s={m.home} right={false} />
-        <div style={{ flexShrink: 0, minWidth: isMobile ? 36 : 46, textAlign: "center" }}>
+        <div style={{
+          flexShrink: 0, minWidth: isMobile ? 38 : 50, textAlign: "center",
+          padding: isMobile ? "3px 2px" : "4px 2px", borderRadius: 8,
+          background: hasScore ? "rgba(255,255,255,0.04)" : "transparent",
+        }}>
           <span style={{
-            display: "block", fontWeight: 800, fontSize: isMobile ? 13 : 14,
+            display: "block", fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: isMobile ? 15 : 17, letterSpacing: 0.5,
             color: hasScore ? C.text : C.mut2,
           }}>
             {hasScore ? `${m.home.score}\u2013${m.away.score}` : "vs"}
@@ -425,7 +444,7 @@ function TournamentTab({ api, schedule }) {
 
     return (
       <Card style={{ padding: isMobile ? 10 : 16 }}>
-        <div style={{ color: C.mut2, fontSize: isMobile ? 11 : 12, fontWeight: 800, letterSpacing: 0.5, textTransform: "uppercase", marginBottom: isMobile ? 6 : 10 }}>
+        <div style={{ color: C.goldBright, fontFamily: FONT_DISPLAY, fontSize: isMobile ? 11 : 12, fontWeight: 600, letterSpacing: 1, textTransform: "uppercase", marginBottom: isMobile ? 6 : 10 }}>
           Group {groupNum}
         </div>
 
@@ -439,8 +458,11 @@ function TournamentTab({ api, schedule }) {
           paddingBottom: isMobile ? 4 : 6,
           marginBottom: isMobile ? 4 : 6,
           color: C.mut2,
+          fontFamily: FONT_DISPLAY,
           fontSize: headerFontSize,
-          fontWeight: 700,
+          fontWeight: 600,
+          letterSpacing: 0.5,
+          textTransform: "uppercase",
           width: "100%",
           overflow: "hidden",
         }}>
@@ -476,7 +498,7 @@ function TournamentTab({ api, schedule }) {
                   color: qual,
                 }}
               >
-                <div style={{ textAlign: "center", fontWeight: 800, color: qual }}>
+                <div style={{ textAlign: "center", fontFamily: FONT_DISPLAY, fontWeight: 600, color: qual }}>
                   {t.pos || idx + 1}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: isMobile ? 3 : 5 }}>
@@ -494,7 +516,7 @@ function TournamentTab({ api, schedule }) {
                 <div style={{ textAlign: "center", fontWeight: 600, color: t.gd >= 0 ? C.win : C.red }}>
                   {t.gd >= 0 ? "+" : ""}{t.gd}
                 </div>
-                <div style={{ textAlign: "center", fontWeight: 800, color: C.goldBright, fontSize: isMobile ? 12 : 13 }}>
+                <div style={{ textAlign: "center", fontFamily: FONT_DISPLAY, fontWeight: 600, color: C.goldBright, fontSize: isMobile ? 13 : 14 }}>
                   {t.pts}
                 </div>
               </div>
@@ -510,7 +532,7 @@ function TournamentTab({ api, schedule }) {
     const homeWon = match.home.score !== null && match.home.win;
     const awayWon = match.away.score !== null && match.away.win;
     return (
-      <div style={{ border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden", background: C.card, fontSize: 12 }}>
+      <div style={{ border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden", background: C.cardGrad, boxShadow: `${SHADOW.card}, ${SHADOW.inset}`, fontSize: 12 }}>
         <div style={{
           padding: "6px 8px", display: "flex", alignItems: "center", gap: 6, background: homeWon ? C.winBgStrong : "transparent",
           borderBottom: `1px solid ${C.border}`,
@@ -519,7 +541,7 @@ function TournamentTab({ api, schedule }) {
           <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: homeWon ? C.win : C.text, fontWeight: homeWon ? 700 : 600 }}>
             {match.home.name}
           </span>
-          {match.home.score !== null && <span style={{ fontWeight: 700, minWidth: 20, textAlign: "right" }}>{match.home.score}</span>}
+          {match.home.score !== null && <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 14, minWidth: 20, textAlign: "right" }}>{match.home.score}</span>}
         </div>
         <div style={{
           padding: "6px 8px", display: "flex", alignItems: "center", gap: 6, background: awayWon ? C.winBgStrong : "transparent",
@@ -528,7 +550,7 @@ function TournamentTab({ api, schedule }) {
           <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: awayWon ? C.win : C.text, fontWeight: awayWon ? 700 : 600 }}>
             {match.away.name}
           </span>
-          {match.away.score !== null && <span style={{ fontWeight: 700, minWidth: 20, textAlign: "right" }}>{match.away.score}</span>}
+          {match.away.score !== null && <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 14, minWidth: 20, textAlign: "right" }}>{match.away.score}</span>}
         </div>
       </div>
     );
@@ -547,7 +569,7 @@ function TournamentTab({ api, schedule }) {
         <div style={{ display: "grid", gridTemplateColumns: `repeat(${stages.length}, minmax(130px, 1fr))`, gap: 12, minWidth: "100%" }}>
           {stages.map((stage) => (
             <div key={stage}>
-              <div style={{ color: C.mut2, fontSize: 11, fontWeight: 800, letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 8, textAlign: "center" }}>
+              <div style={{ color: C.goldBright, fontFamily: FONT_DISPLAY, fontSize: 11, fontWeight: 600, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8, textAlign: "center" }}>
                 {ROUND_LABEL[stage] || stage}
               </div>
               <div style={{ display: "grid", gap: 8 }}>

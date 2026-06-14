@@ -76,7 +76,7 @@ function App() {
     return out;
   }, [api]);
 
-  const syncColor = { idle: C.mut, loading: C.mut, ok: "#3f9c5b", error: "#c2547f" }[sync.status];
+  const syncColor = { idle: C.mut, loading: C.mut, ok: C.win, error: C.red }[sync.status];
   const syncText = sync.status === "loading" ? "Syncing from ESPN…"
     : sync.status === "error" ? "Couldn't reach ESPN — using saved data"
     : sync.at ? `Synced ${new Date(sync.at).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`
@@ -84,33 +84,51 @@ function App() {
 
   return (
     <div style={{
-      minHeight: "100vh", background: `radial-gradient(1200px 600px at 50% -10%, ${C.bg2}, ${C.bg})`,
-      fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif", color: C.text,
+      minHeight: "100vh",
+      background: `radial-gradient(900px 500px at 12% -8%, rgba(212,175,55,0.10), transparent 60%), `
+        + `radial-gradient(900px 500px at 88% -5%, rgba(63,214,138,0.07), transparent 60%), `
+        + `radial-gradient(1200px 700px at 50% -10%, ${C.bg2}, ${C.bg} 60%)`,
+      fontFamily: FONT_BODY, color: C.text,
     }}>
       <div style={{ maxWidth: containerWidth, margin: "0 auto", padding: `${padding}px ${padding}px ${padding + 40}px`, transition: "all 0.3s ease" }}>
         {/* Header */}
-        <div style={{ textAlign: "center", paddingBottom: padding, borderBottom: `1px solid ${C.gold}55`, marginBottom: padding }}>
-          <div style={{ fontSize: isMobile ? 20 : isTablet ? 22 : 24, letterSpacing: 3 }}>🏆 🌍 ⚽</div>
+        <div style={{ textAlign: "center", paddingBottom: padding, marginBottom: padding }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", justifyContent: "center",
+            width: isMobile ? 50 : 58, height: isMobile ? 50 : 58, borderRadius: 16,
+            background: C.goldGrad, boxShadow: SHADOW.gold,
+            fontSize: isMobile ? 24 : 28, marginBottom: 10,
+          }}>🏆</div>
           <h1 style={{
-            color: C.gold, margin: `${padding / 2}px 0 4px`, fontSize: headerSize, fontWeight: 900, letterSpacing: isMobile ? 1 : 2,
-          }}>THE LEGACY LEAGUE</h1>
-          <div style={{ color: C.mut, fontSize: isMobile ? 10 : 11, letterSpacing: 2, fontWeight: 600 }}>
-            WORLD CUP 2026 · FANTASY FOOTBALL DRAFT
+            fontFamily: FONT_DISPLAY, margin: 0, fontSize: headerSize, fontWeight: 600,
+            letterSpacing: isMobile ? 2 : 4, textTransform: "uppercase", ...goldText,
+          }}>The Legacy League</h1>
+          <div style={{ color: C.mut, fontSize: isMobile ? 10 : 11, letterSpacing: 3, fontWeight: 600, textTransform: "uppercase", marginTop: 6 }}>
+            World Cup 2026 · Fantasy Football Draft
           </div>
+          <div style={{ height: 3, width: 90, margin: `${padding}px auto 0`, borderRadius: 2, background: C.goldGrad, boxShadow: SHADOW.gold }} />
         </div>
 
         {/* Sync bar */}
         <div style={{
           display: "flex", alignItems: "center", gap: padding / 2, marginBottom: padding,
-          background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, padding: `${padding / 2}px ${padding / 1.5}px`,
+          background: C.cardGrad, border: `1px solid ${C.border}`, borderRadius: 12, padding: `${padding / 2}px ${padding / 1.5}px`,
+          boxShadow: `${SHADOW.card}, ${SHADOW.inset}`,
           flexWrap: isMobile ? "wrap" : "nowrap",
         }}>
-          <span style={{ width: 8, height: 8, borderRadius: 99, background: syncColor, flexShrink: 0 }} />
+          <span style={{
+            width: 8, height: 8, borderRadius: 99, background: syncColor, flexShrink: 0,
+            boxShadow: sync.status === "idle" ? "none" : `0 0 8px ${syncColor}`,
+            animation: sync.status === "loading" ? "pulse 1.5s infinite" : "none",
+          }} />
           <span style={{ flex: 1, color: C.mut, fontSize: isMobile ? 11.5 : 12.5, minWidth: isMobile ? "100%" : "auto" }}>{syncText}</span>
           <button onClick={doSync} disabled={sync.status === "loading"} style={{
-            background: "transparent", border: `1px solid ${C.gold}66`, color: C.goldBright,
+            background: "linear-gradient(135deg, rgba(212,175,55,0.18), rgba(212,175,55,0.05))",
+            border: `1px solid ${C.gold}66`, color: C.goldBright,
             borderRadius: 8, padding: `${padding / 2.5}px ${padding / 1.5}px`, fontSize: isMobile ? 11.5 : 12.5, fontWeight: 700,
+            fontFamily: FONT_DISPLAY, letterSpacing: 0.5, textTransform: "uppercase",
             cursor: sync.status === "loading" ? "default" : "pointer", opacity: sync.status === "loading" ? 0.5 : 1, whiteSpace: "nowrap",
+            transition: "all 0.2s",
           }}>Sync now</button>
         </div>
 
@@ -121,14 +139,16 @@ function App() {
             return (
               <button key={t.key} onClick={() => setTab(t.key)} style={{
                 display: "flex", flexDirection: "column", alignItems: "center", gap: 3,
-                background: active ? C.cardHi : "transparent",
-                border: "none", borderBottom: active ? `2px solid ${C.gold}` : "2px solid transparent",
-                borderRadius: 8, padding: `${padding / 1.5}px 2px`, cursor: "pointer",
-                color: active ? C.gold : C.mut, fontWeight: active ? 800 : 600,
+                background: active ? "linear-gradient(165deg, rgba(212,175,55,0.20), rgba(212,175,55,0.05))" : "transparent",
+                border: active ? "1px solid rgba(212,175,55,0.35)" : "1px solid transparent",
+                boxShadow: active ? SHADOW.gold : "none",
+                borderRadius: 10, padding: `${padding / 1.5}px 2px`, cursor: "pointer",
+                color: active ? C.goldBright : C.mut, fontWeight: active ? 700 : 600,
+                fontFamily: FONT_DISPLAY, letterSpacing: 0.3,
                 fontSize: isMobile ? 10 : 11, transition: "all 0.2s",
               }}>
                 <span style={{ fontSize: isMobile ? 16 : 18 }}>{t.icon}</span>
-                <span style={{ letterSpacing: 0.3, textTransform: "uppercase", textAlign: "center", lineHeight: 1.1, fontSize: isMobile ? 9 : 10 }}>{t.label}</span>
+                <span style={{ letterSpacing: 0.5, textTransform: "uppercase", textAlign: "center", lineHeight: 1.1, fontSize: isMobile ? 9 : 10 }}>{t.label}</span>
               </button>
             );
           })}

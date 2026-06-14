@@ -97,17 +97,17 @@ const TEAM_SQUAD = {};
 SQUADS.forEach((squad, i) => squad.forEach((code) => { TEAM_SQUAD[code] = i; }));
 
 const DIVISIONS = [
-  { key: "gold",   label: "Premier League", color: "#e8be4a", dim: "#d4a017" },
+  { key: "gold",   label: "Premier League", color: "#f6d87c", dim: "#d4af37" },
   { key: "silver", label: "Undertakers",    color: "#cdd5e0", dim: "#9aa6b8" },
   { key: "bronze", label: "Bottom Feeders", color: "#d99a5b", dim: "#b87333" },
 ];
-const DIV_COLOR = { gold: "#e8be4a", silver: "#cdd5e0", bronze: "#d99a5b" };
+const DIV_COLOR = { gold: "#f6d87c", silver: "#cdd5e0", bronze: "#d99a5b" };
 
 const TIER_META = {
-  1: { name: "Elite Favourites", odds: "+450 to +5000",      color: "#d4a017", bg: "rgba(212,160,23,0.10)" },
+  1: { name: "Elite Favourites", odds: "+450 to +5000",      color: "#d4af37", bg: "rgba(212,175,55,0.10)" },
   2: { name: "Contenders",       odds: "+5500 to +20000",    color: "#9aa6b8", bg: "rgba(154,166,184,0.10)" },
-  3: { name: "Dark Horses",      odds: "+20000 to +70000",   color: "#3f9c5b", bg: "rgba(63,156,91,0.12)" },
-  4: { name: "Long Shots",       odds: "+100000+",           color: "#c2547f", bg: "rgba(194,84,127,0.12)" },
+  3: { name: "Dark Horses",      odds: "+20000 to +70000",   color: "#3fd68a", bg: "rgba(63,214,138,0.12)" },
+  4: { name: "Long Shots",       odds: "+100000+",           color: "#e15b73", bg: "rgba(225,91,115,0.12)" },
 };
 
 // Furthest stage / placement options
