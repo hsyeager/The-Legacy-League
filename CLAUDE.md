@@ -89,11 +89,12 @@ banners). Listed in load order:
    the base bg/card/text/gold/mut/red tones), `Flag`, `TierPill`, `Card`, `SectionTitle`, `ManagerNames`,
    `TeamRow` (shared row renderer for a single team — flag, name + status, optional GD/GF/W/CS stats, tier pill,
    points, and a chevron; supports a `"card"` variant used by `PointsTab` and a `"list"` variant used by
-   `TeamsTab`), `TeamDetail` (the bottom-sheet modal showing a team's full match log and point breakdown), and
-   `CollapsibleSection`.
+   `StandingsTab`'s expanded squad dropdown), `TeamDetail` (the bottom-sheet modal showing a team's full match log
+   and point breakdown), and `CollapsibleSection`.
 
-6. **`js/tabs.js` — TABS** — one component per bottom-nav tab: `PointsTab`, `RulesTab`, `TeamsTab`,
-   `StandingsTab` (fantasy standings, with Gold/Silver/Bronze division toggle), `TeamOwners`, `MatchRow`,
+6. **`js/tabs.js` — TABS** — one component per bottom-nav tab: `PointsTab`, `RulesTab`,
+   `StandingsTab` (fantasy standings, with Gold/Silver/Bronze division toggle; each manager row expands into a
+   dropdown listing their squad's nations via `TeamRow`'s `"list"` variant), `TeamOwners`, `MatchRow`,
    `GameLogTab` (Past/Today/Future collapsible match lists via `MatchRow`), `TournamentTab` (real-world World Cup
    group standings, reconstructed via `GroupTable` from each team's `GROUP`-stage results in `api` — separate from
    the fantasy `StandingsTab`).
@@ -120,4 +121,5 @@ banners). Listed in load order:
   layout and responsive styling lives inline in the JSX via the per-component breakpoint pattern above. Don't
   reintroduce unused global CSS (e.g. custom properties) there.
 - When adding a shared row/list UI for a team, prefer extending `TeamRow` (`js/ui.js`) over duplicating markup in
-  a tab — both `PointsTab` and `TeamsTab` already share it via the `"card"`/`"list"` variants.
+  a tab — both `PointsTab` and `StandingsTab`'s expanded squad dropdown already share it via the `"card"`/`"list"`
+  variants.

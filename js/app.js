@@ -3,7 +3,6 @@ const TABS = [
   { key: "points",    label: "Results by Nation", icon: "⚽" },
   { key: "tournament", label: "Tournament",    icon: "🏆" },
   { key: "gamelog",  label: "Game Log",        icon: "📅" },
-  { key: "teams",     label: "Teams",          icon: "👥" },
   { key: "rules",     label: "Rules",          icon: "📋" },
 ];
 
@@ -155,9 +154,8 @@ function App() {
         </div>
 
         {tab === "rules" && <RulesTab />}
-        {tab === "standings" && <StandingsTab results={results} />}
+        {tab === "standings" && <StandingsTab api={api} results={results} onSelect={setSelected} />}
         {tab === "tournament" && <TournamentTab api={api} schedule={schedule} />}
-        {tab === "teams" && <TeamsTab api={api} results={results} onSelect={setSelected} />}
         {tab === "points" && <PointsTab results={results} api={api} onSelect={setSelected} />}
         {tab === "gamelog" && <GameLogTab schedule={schedule} />}
       </div>

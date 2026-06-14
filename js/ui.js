@@ -117,7 +117,7 @@ const MEDAL = ["🥇", "🥈", "🥉"];
 
 // Shared row for a single team: flag, name + status, optional GD/GF/W/CS stats,
 // tier pill, points, and a chevron. Used by PointsTab (variant "card") and
-// TeamsTab (variant "list", with per-team stats).
+// StandingsTab's expanded squad dropdown (variant "list", with per-team stats).
 function TeamRow({ code, tier, pts, status, onSelect, rank, stats, variant = "card" }) {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 481;
   const nameCol = status.elim ? C.red : status.gold ? C.goldBright : C.text;
