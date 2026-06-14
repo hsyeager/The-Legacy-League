@@ -15,8 +15,11 @@ This is a **single self-contained HTML file** (`index.html`) — no build step, 
 - React 18 and Babel Standalone are loaded from `unpkg.com` via `<script>` tags in `<head>`.
 - All app code lives in one `<script type="text/babel" data-presets="react">` block at the bottom of the file,
   written as JSX and transpiled in-browser by Babel.
-- There is no test suite, linter, or build/dev command — just open `index.html` in a browser (or serve the
-  directory with any static file server) to run it.
+- There is no linter or build/dev command — just open `index.html` in a browser (or serve the directory with any
+  static file server) to run it.
+- A Playwright scaffold (`playwright.config.ts`, `tests/`, `.github/workflows/playwright.yml`) is set up via
+  `npm install`, but `tests/example.spec.ts` is still the unmodified `npm init playwright` boilerplate (it tests
+  playwright.dev, not this app) — there are no real tests for `index.html` yet.
 
 ### Running / verifying changes
 
@@ -28,6 +31,11 @@ python3 -m http.server 8000
 
 Opening the file directly (`file://`) also works since there's no server-side logic, but a local HTTP server
 avoids any browser quirks with `fetch` from `file://` origins.
+
+```bash
+# run the Playwright suite (currently just boilerplate, see above)
+npx playwright test
+```
 
 ## Code structure (all within `index.html`)
 
@@ -73,8 +81,10 @@ The script is organized into clearly delimited sections via comment banners, in 
    `SectionTitle`, `ManagerNames`, `PointsTab`, `TeamDetail` (the bottom-sheet modal showing a team's full match log
    and point breakdown).
 
-6. **TABS** — one component per bottom-nav tab: `RulesTab`, `TeamsTab`, `StandingsTab` (with Gold/Silver/Bronze
-   division toggle), `GameLogTab` (Past/Today/Future collapsible match lists via `MatchRow`).
+6. **TABS** — one component per bottom-nav tab: `RulesTab`, `TeamsTab`, `StandingsTab` (fantasy standings, with
+   Gold/Silver/Bronze division toggle), `TournamentTab` (real-world World Cup group standings, reconstructed via
+   `GroupTable` from each team's `GROUP`-stage results in `api` — separate from the fantasy `StandingsTab`),
+   `GameLogTab` (Past/Today/Future collapsible match lists via `MatchRow`).
 
 7. **ROOT** — `App()`: top-level state (`tab`, `selected`, `api`, `schedule`, `sync` status), loads/saves via
    `localStorage`, and auto-syncs from ESPN on mount + every 5 minutes via `setInterval`. Renders the header, sync
@@ -90,3 +100,8 @@ The script is organized into clearly delimited sections via comment banners, in 
 - `teamScore`/`managerScore` are pure — they take `results`/`api` data and constants as input, with no side
   effects. Any new scoring rule should be expressible as a constant table (like `WIN_PTS`, `ROUND_BONUS`, etc.) read
   by these functions, then mirrored in `RulesTab`'s prose.
+- Responsive layout is handled per-component, not via a shared hook/context: most components independently compute
+  `isMobile`/`isTablet` from `window.innerWidth` (breakpoints at 481px and 769px) and branch styles/grid columns on
+  that. `App()` separately tracks `width` via a `resize` listener for the header/tab bar. New responsive UI should
+  follow this same inline-breakpoint pattern. Note the `--pad`/`--gap-*`/`--h1`/etc. CSS custom properties set per
+  breakpoint in the `<head>` `<style>` block are currently unused by the JSX.
