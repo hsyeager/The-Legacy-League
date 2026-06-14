@@ -146,40 +146,9 @@ function RulesTab() {
   );
 }
 
-function TeamsTab({ api, results, onSelect }) {
-  return (
-    <div style={{ display: "grid", gap: 12 }}>
-      <SectionTitle icon="👥">Squads</SectionTitle>
-      {SQUADS.map((squad, i) => {
-        const sorted = [...squad].sort((a, b) => TEAMS[a].tier - TEAMS[b].tier);
-        const groupPts = managerScore(squad, results).pts;
-        return (
-          <Card key={i} style={{ padding: 16 }}>
-            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
-              <div style={{ color: C.goldBright, fontFamily: FONT_DISPLAY, fontSize: 11, fontWeight: 600, letterSpacing: 1.5, textTransform: "uppercase" }}>
-                Group {i + 1}
-              </div>
-              <div style={{ color: C.goldBright, fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: 16, flexShrink: 0 }}>
-                {groupPts} <span style={{ color: C.mut2, fontWeight: 700, fontSize: 10, letterSpacing: 0.5, textTransform: "uppercase" }}>pts</span>
-              </div>
-            </div>
-            <div style={{ marginBottom: 10 }}><ManagerNames i={i} /></div>
-            {sorted.map((code) => {
-              const sc = teamScore(results[code], TEAMS[code].tier);
-              return (
-                <TeamRow key={code} code={code} tier={TEAMS[code].tier} pts={sc.pts}
-                  status={statusOf(api[code])} stats={sc} onSelect={onSelect} variant="list" />
-              );
-            })}
-          </Card>
-        );
-      })}
-    </div>
-  );
-}
-
-function StandingsTab({ results }) {
+function StandingsTab({ api, results, onSelect }) {
   const [div, setDiv] = useState("gold");
+  const [expanded, setExpanded] = useState({});
   const divColor = DIV_COLOR[div];
   const isMobile = typeof window !== "undefined" && window.innerWidth < 481;
 
@@ -217,40 +186,64 @@ function StandingsTab({ results }) {
         {DIVISIONS.find((d) => d.key === div).label} league
       </div>
 
-      {rows.map((r, rank) => (
-        <Card key={r.i} style={{
-          padding: isMobile ? 10 : 14,
-          borderColor: rank === 0 ? `${divColor}66` : C.border,
-          boxShadow: rank === 0 ? `${SHADOW.card}, 0 0 0 1px ${divColor}22, ${SHADOW.inset}` : `${SHADOW.card}, ${SHADOW.inset}`,
-        }}>
-          <div style={{ display: "flex", alignItems: "flex-start", gap: isMobile ? 8 : 12 }}>
-            <div style={{ width: isMobile ? 24 : 30, textAlign: "center", fontFamily: FONT_DISPLAY, fontSize: rank < 3 ? (isMobile ? 18 : 20) : (isMobile ? 13 : 15), color: C.mut, fontWeight: 600, flexShrink: 0 }}>
-              {medal[rank] || rank + 1}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ color: divColor, fontWeight: 700, fontSize: isMobile ? 13 : 15 }}>{MANAGERS[r.i][div]}</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: isMobile ? "2px 6px" : "3px 10px", marginTop: 4, fontSize: isMobile ? 11 : 12, color: C.mut }}>
-                <span style={{ color: C.mut2, fontWeight: 700 }}>G{r.i + 1}</span>
-                {r.squad.map((c) => (
-                  <span key={c} style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                    <Flag code={c} size={isMobile ? 11 : 13} /> {isMobile ? c : TEAMS[c].name}
-                  </span>
-                ))}
+      {rows.map((r, rank) => {
+        const open = !!expanded[r.i];
+        const sorted = [...r.squad].sort((a, b) => TEAMS[a].tier - TEAMS[b].tier);
+        return (
+          <Card key={r.i} style={{
+            padding: isMobile ? 10 : 14,
+            borderColor: rank === 0 ? `${divColor}66` : C.border,
+            boxShadow: rank === 0 ? `${SHADOW.card}, 0 0 0 1px ${divColor}22, ${SHADOW.inset}` : `${SHADOW.card}, ${SHADOW.inset}`,
+          }}>
+            <button onClick={() => setExpanded((e) => ({ ...e, [r.i]: !e[r.i] }))} style={{
+              display: "flex", alignItems: "flex-start", gap: isMobile ? 8 : 12,
+              width: "100%", textAlign: "left", background: "none", border: "none", padding: 0,
+              color: "inherit", font: "inherit", cursor: "pointer",
+            }}>
+              <div style={{ width: isMobile ? 24 : 30, textAlign: "center", fontFamily: FONT_DISPLAY, fontSize: rank < 3 ? (isMobile ? 18 : 20) : (isMobile ? 13 : 15), color: C.mut, fontWeight: 600, flexShrink: 0 }}>
+                {medal[rank] || rank + 1}
               </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ color: divColor, fontWeight: 700, fontSize: isMobile ? 13 : 15 }}>{MANAGERS[r.i][div]}</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: isMobile ? "2px 6px" : "3px 10px", marginTop: 4, fontSize: isMobile ? 11 : 12, color: C.mut }}>
+                  <span style={{ color: C.mut2, fontWeight: 700 }}>G{r.i + 1}</span>
+                  {r.squad.map((c) => (
+                    <span key={c} style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                      <Flag code={c} size={isMobile ? 11 : 13} /> {isMobile ? c : TEAMS[c].name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div style={{ textAlign: "right", flexShrink: 0 }}>
+                <div style={{ color: divColor, fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: isMobile ? 19 : 23, lineHeight: 1 }}>{r.pts}</div>
+                <div style={{ color: C.mut2, fontSize: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>pts</div>
+              </div>
+              <span style={{
+                color: C.mut2, fontSize: 13, width: 22, height: 22, borderRadius: 999, flexShrink: 0, marginTop: 2,
+                display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(255,255,255,0.04)",
+                transform: open ? "rotate(90deg)" : "none", transition: "transform .15s",
+              }}>›</span>
+            </button>
+            <div style={{ display: "flex", gap: isMobile ? 10 : 14, marginTop: 6, color: C.mut2, fontSize: isMobile ? 10 : 11.5, flexWrap: "wrap" }}>
+              <span>GD {r.gd >= 0 ? "+" : ""}{r.gd}</span>
+              <span>GF {r.gf}</span>
+              <span>Wins {r.wins}</span>
+              <span>CS {r.cleanSheets}</span>
             </div>
-            <div style={{ textAlign: "right", flexShrink: 0 }}>
-              <div style={{ color: divColor, fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: isMobile ? 19 : 23, lineHeight: 1 }}>{r.pts}</div>
-              <div style={{ color: C.mut2, fontSize: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>pts</div>
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: isMobile ? 10 : 14, marginTop: 6, color: C.mut2, fontSize: isMobile ? 10 : 11.5, flexWrap: "wrap" }}>
-            <span>GD {r.gd >= 0 ? "+" : ""}{r.gd}</span>
-            <span>GF {r.gf}</span>
-            <span>Wins {r.wins}</span>
-            <span>CS {r.cleanSheets}</span>
-          </div>
-        </Card>
-      ))}
+            {open && (
+              <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${C.border}` }}>
+                {sorted.map((code) => {
+                  const sc = teamScore(results[code], TEAMS[code].tier);
+                  return (
+                    <TeamRow key={code} code={code} tier={TEAMS[code].tier} pts={sc.pts}
+                      status={statusOf(api[code])} stats={sc} onSelect={onSelect} variant="list" />
+                  );
+                })}
+              </div>
+            )}
+          </Card>
+        );
+      })}
     </div>
   );
 }
