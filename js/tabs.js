@@ -269,8 +269,14 @@ function MatchRow({ m }) {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 481;
   const dt = (() => {
     try {
-      return new Date(m.date).toLocaleString("en-US", {
-        timeZone: "America/Chicago", weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
+      const d = new Date(m.date);
+      const ctDay = d.toLocaleDateString("en-CA", { timeZone: "America/Chicago" });
+      const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Chicago" });
+      const isPast = ctDay < today;
+      return d.toLocaleString("en-US", {
+        timeZone: "America/Chicago",
+        ...(isPast ? { month: "short", day: "numeric" } : {}),
+        hour: "numeric", minute: "2-digit",
       }) + " CT";
     } catch (e) { return ""; }
   })();
@@ -282,9 +288,9 @@ function MatchRow({ m }) {
       justifyContent: right ? "flex-end" : "flex-start",
       color: (m.completed || isLive) && s.win ? C.text : C.mut, fontWeight: (m.completed || isLive) && s.win ? 800 : 600, fontSize: isMobile ? 12 : 13,
     }}>
-      {right && <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "right", fontSize: isMobile ? 11 : "inherit" }}>{isMobile ? s.name.substring(0, 3) : s.name}</span>}
+      {right && <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "right", fontSize: isMobile ? 11 : "inherit" }}>{s.name}</span>}
       {s.code ? <Flag code={s.code} size={isMobile ? 14 : 16} /> : <span style={{ fontSize: isMobile ? 12 : 14 }}>•</span>}
-      {!right && <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: isMobile ? 11 : "inherit" }}>{isMobile ? s.name.substring(0, 3) : s.name}</span>}
+      {!right && <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontSize: isMobile ? 11 : "inherit" }}>{s.name}</span>}
     </div>
   );
   const hasStarted = hasScore;
@@ -301,7 +307,7 @@ function MatchRow({ m }) {
         <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
           {isLive && <span style={{ width: 5, height: 5, borderRadius: 99, background: C.live, boxShadow: `0 0 6px ${C.live}`, animation: "pulse 1.5s infinite", flexShrink: 0 }} />}
           <span style={{ color: isLive ? C.live : C.mut2, fontSize: isMobile ? 10 : 11, fontWeight: isLive ? 700 : 400 }}>
-            {isLive ? "LIVE" : (isMobile ? new Date(m.date).toLocaleDateString() : dt)}
+            {isLive ? "LIVE" : dt}
           </span>
         </div>
       </div>
