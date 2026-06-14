@@ -808,21 +808,29 @@ function RulesTab() {
   );
 }
 
-function TeamsTab({ api, onSelect }) {
+function TeamsTab({ api, results, onSelect }) {
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 481;
   return (
     <div style={{ display: "grid", gap: 12 }}>
       <SectionTitle icon="👥">Squads</SectionTitle>
       {SQUADS.map((squad, i) => {
         const sorted = [...squad].sort((a, b) => TEAMS[a].tier - TEAMS[b].tier);
+        const groupPts = managerScore(squad, results).pts;
         return (
           <Card key={i} style={{ padding: 16 }}>
-            <div style={{ color: C.mut2, fontSize: 11, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase", marginBottom: 8 }}>
-              Group {i + 1}
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10, marginBottom: 8 }}>
+              <div style={{ color: C.mut2, fontSize: 11, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase" }}>
+                Group {i + 1}
+              </div>
+              <div style={{ color: C.goldBright, fontWeight: 800, fontSize: 14, flexShrink: 0 }}>
+                {groupPts} <span style={{ color: C.mut2, fontWeight: 700, fontSize: 10, letterSpacing: 0.5, textTransform: "uppercase" }}>pts</span>
+              </div>
             </div>
             <div style={{ marginBottom: 10 }}><ManagerNames i={i} /></div>
             {sorted.map((code) => {
               const s = statusOf(api[code]);
               const nameCol = s.elim ? C.red : s.gold ? C.goldBright : C.text;
+              const sc = teamScore(results[code], TEAMS[code].tier);
               return (
                 <button key={code} onClick={() => onSelect(code)} style={{
                   display: "flex", alignItems: "center", gap: 10, width: "100%", textAlign: "left",
@@ -833,8 +841,15 @@ function TeamsTab({ api, onSelect }) {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ color: nameCol, fontSize: 14.5, fontWeight: 600, textDecoration: s.elim ? "line-through" : "none" }}>{TEAMS[code].name}</div>
                     {s.label && <div style={{ color: s.elim ? C.red : C.mut2, fontSize: 11, marginTop: 1 }}>{s.label}</div>}
+                    <div style={{ display: "flex", gap: isMobile ? 8 : 12, marginTop: 2, color: C.mut2, fontSize: isMobile ? 10 : 11, flexWrap: "wrap" }}>
+                      <span>GD {sc.gd >= 0 ? "+" : ""}{sc.gd}</span>
+                      <span>GF {sc.gf}</span>
+                      <span>W {sc.wins}</span>
+                      <span>CS {sc.cleanSheets}</span>
+                    </div>
                   </div>
                   <TierPill tier={TEAMS[code].tier} small />
+                  <span style={{ color: C.goldBright, fontWeight: 800, fontSize: 18, minWidth: 28, textAlign: "right" }}>{sc.pts}</span>
                   <span style={{ color: C.mut2, fontSize: 13 }}>›</span>
                 </button>
               );
@@ -1427,7 +1442,7 @@ function App() {
         {tab === "rules" && <RulesTab />}
         {tab === "standings" && <StandingsTab results={results} />}
         {tab === "tournament" && <TournamentTab api={api} schedule={schedule} />}
-        {tab === "teams" && <TeamsTab api={api} onSelect={setSelected} />}
+        {tab === "teams" && <TeamsTab api={api} results={results} onSelect={setSelected} />}
         {tab === "points" && <PointsTab results={results} api={api} onSelect={setSelected} />}
         {tab === "gamelog" && <GameLogTab schedule={schedule} />}
       </div>
