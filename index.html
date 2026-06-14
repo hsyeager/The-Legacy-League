@@ -1046,9 +1046,170 @@ function GameLogTab({ schedule }) {
 /*  ROOT                                                               */
 /* ------------------------------------------------------------------ */
 
+function TournamentTab({ api, schedule }) {
+  // Build list of groups from teams' group matches
+  const groups = useMemo(() => {
+    const groupMap = {};
+    Object.keys(TEAMS).forEach((code) => {
+      const matches = (api[code]?.matches || []).filter((m) => m.round === "GROUP");
+      const opponents = new Set();
+      matches.forEach((m) => { if (m.oppCode) opponents.add(m.oppCode); });
+      opponents.add(code);
+
+      const groupId = Array.from(opponents).sort().join("-");
+      if (!groupMap[groupId]) groupMap[groupId] = [];
+      groupMap[groupId].push(code);
+    });
+
+    return Object.values(groupMap).map((teams) => {
+      const standings = teams.map((code) => {
+        const r = api[code];
+        const matches = (r?.matches || []).filter((m) => m.round === "GROUP");
+        let p = 0, w = 0, d = 0, l = 0, gf = 0, ga = 0;
+        matches.forEach((m) => {
+          if (!m.completed) return;
+          p++; gf += m.gf || 0; ga += m.ga || 0;
+          if (m.gf > m.ga) w++;
+          else if (m.gf === m.ga) d++;
+          else l++;
+        });
+        const pts = w * 3 + d;
+        const gd = gf - ga;
+        return { code, p, w, d, l, gf, ga, gd, pts, pos: r?.groupPos || 0 };
+      });
+      standings.sort((a, b) => b.pts - a.pts || b.gd - a.gd || b.gf - a.gf);
+      return standings;
+    });
+  }, [api]);
+
+  const GroupTable = ({ standings, groupNum }) => (
+    <Card>
+      <div style={{ color: C.mut2, fontSize: 11, fontWeight: 800, letterSpacing: 1, textTransform: "uppercase", marginBottom: 10 }}>
+        Group {groupNum}
+      </div>
+      <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, color: C.text }}>
+          <thead>
+            <tr style={{ borderBottom: `1px solid ${C.border}` }}>
+              {["", "Team", "P", "W", "D", "L", "GF", "GA", "GD", "Pts"].map((h) => (
+                <th key={h} style={{ padding: "6px 8px", textAlign: h === "Team" ? "left" : "center", color: C.mut2, fontWeight: 700, fontSize: 11 }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {standings.map((t, idx) => {
+              const qual = t.pos === 1 || t.pos === 2 ? "#46a865" : C.text;
+              return (
+                <tr key={t.code} style={{ borderTop: `1px solid ${C.border}`, background: idx < 2 ? "rgba(70,168,101,0.05)" : "transparent" }}>
+                  <td style={{ padding: "6px 8px", textAlign: "center", color: qual, fontWeight: 800, fontSize: 11 }}>{t.pos || idx + 1}</td>
+                  <td style={{ padding: "6px 8px", display: "flex", alignItems: "center", gap: 6, color: qual }}>
+                    <Flag code={t.code} size={16} />{TEAMS[t.code].name}
+                  </td>
+                  <td style={{ padding: "6px 8px", textAlign: "center" }}>{t.p}</td>
+                  <td style={{ padding: "6px 8px", textAlign: "center" }}>{t.w}</td>
+                  <td style={{ padding: "6px 8px", textAlign: "center" }}>{t.d}</td>
+                  <td style={{ padding: "6px 8px", textAlign: "center" }}>{t.l}</td>
+                  <td style={{ padding: "6px 8px", textAlign: "center" }}>{t.gf}</td>
+                  <td style={{ padding: "6px 8px", textAlign: "center" }}>{t.ga}</td>
+                  <td style={{ padding: "6px 8px", textAlign: "center", color: t.gd >= 0 ? "#46a865" : C.red }}>{t.gd >= 0 ? "+" : ""}{t.gd}</td>
+                  <td style={{ padding: "6px 8px", textAlign: "center", fontWeight: 800, color: C.goldBright }}>{t.pts}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </Card>
+  );
+
+  const BracketMatch = ({ match, stage }) => {
+    if (!match) return <div style={{ height: 50, border: `1px dashed ${C.border}`, borderRadius: 8, background: "rgba(255,255,255,0.02)" }} />;
+    const homeWon = match.home.score !== null && match.home.win;
+    const awayWon = match.away.score !== null && match.away.win;
+    return (
+      <div style={{ border: `1px solid ${C.border}`, borderRadius: 8, overflow: "hidden", background: C.card, fontSize: 12 }}>
+        <div style={{
+          padding: "6px 8px", display: "flex", alignItems: "center", gap: 6, background: homeWon ? "rgba(70,168,101,0.1)" : "transparent",
+          borderBottom: `1px solid ${C.border}`,
+        }}>
+          {match.home.code ? <Flag code={match.home.code} size={14} /> : <span style={{ fontSize: 10 }}>•</span>}
+          <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: homeWon ? "#46a865" : C.text, fontWeight: homeWon ? 700 : 600 }}>
+            {match.home.name}
+          </span>
+          {match.home.score !== null && <span style={{ fontWeight: 700, minWidth: 20, textAlign: "right" }}>{match.home.score}</span>}
+        </div>
+        <div style={{
+          padding: "6px 8px", display: "flex", alignItems: "center", gap: 6, background: awayWon ? "rgba(70,168,101,0.1)" : "transparent",
+        }}>
+          {match.away.code ? <Flag code={match.away.code} size={14} /> : <span style={{ fontSize: 10 }}>•</span>}
+          <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: awayWon ? "#46a865" : C.text, fontWeight: awayWon ? 700 : 600 }}>
+            {match.away.name}
+          </span>
+          {match.away.score !== null && <span style={{ fontWeight: 700, minWidth: 20, textAlign: "right" }}>{match.away.score}</span>}
+        </div>
+      </div>
+    );
+  };
+
+  const Bracket = () => {
+    const stages = ["R32", "R16", "QF", "SF", "FINAL"];
+    const stageMatches = {};
+    stages.forEach((s) => { stageMatches[s] = []; });
+    (schedule || []).forEach((m) => {
+      if (stages.includes(m.round)) stageMatches[m.round].push(m);
+    });
+
+    return (
+      <div style={{ overflowX: "auto", paddingBottom: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: `repeat(${stages.length}, minmax(130px, 1fr))`, gap: 12, minWidth: "100%" }}>
+          {stages.map((stage) => (
+            <div key={stage}>
+              <div style={{ color: C.mut2, fontSize: 11, fontWeight: 800, letterSpacing: 0.5, textTransform: "uppercase", marginBottom: 8, textAlign: "center" }}>
+                {ROUND_LABEL[stage] || stage}
+              </div>
+              <div style={{ display: "grid", gap: 8 }}>
+                {stageMatches[stage].length > 0 ? (
+                  stageMatches[stage].map((m) => <BracketMatch key={m.matchNo} match={m} stage={stage} />)
+                ) : (
+                  <div style={{ color: C.mut2, fontSize: 12, textAlign: "center", padding: "20px 8px" }}>
+                    Pending
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div style={{ display: "grid", gap: 16 }}>
+      <div>
+        <SectionTitle icon="🏆">Group Stage Standings</SectionTitle>
+        <div style={{ display: "grid", gap: 10 }}>
+          {groups.map((standings, idx) => (
+            <GroupTable key={idx} standings={standings} groupNum={idx + 1} />
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <SectionTitle icon="🎯">Knockout Bracket</SectionTitle>
+        <Card style={{ padding: 0, overflow: "hidden" }}>
+          <div style={{ padding: 16 }}>
+            <Bracket />
+          </div>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
 const TABS = [
   { key: "standings", label: "Standings",      icon: "📊" },
   { key: "points",    label: "Results by Nation", icon: "⚽" },
+  { key: "tournament", label: "Tournament",    icon: "🏆" },
   { key: "gamelog",  label: "Game Log",        icon: "📅" },
   { key: "teams",     label: "Teams",          icon: "👥" },
   { key: "rules",     label: "Rules",          icon: "📋" },
@@ -1143,7 +1304,7 @@ function App() {
         </div>
 
         {/* Tabs */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 4, marginBottom: 20 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 4, marginBottom: 20 }}>
           {TABS.map((t) => {
             const active = tab === t.key;
             return (
@@ -1163,6 +1324,7 @@ function App() {
 
         {tab === "rules" && <RulesTab />}
         {tab === "standings" && <StandingsTab results={results} />}
+        {tab === "tournament" && <TournamentTab api={api} schedule={schedule} />}
         {tab === "teams" && <TeamsTab api={api} onSelect={setSelected} />}
         {tab === "points" && <PointsTab results={results} api={api} onSelect={setSelected} />}
         {tab === "gamelog" && <GameLogTab schedule={schedule} />}
