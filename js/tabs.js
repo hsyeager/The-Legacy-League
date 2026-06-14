@@ -280,6 +280,13 @@ function MatchRow({ m }) {
       }) + " CT";
     } catch (e) { return ""; }
   })();
+  const isToday = (() => {
+    try {
+      const ctDay = new Date(m.date).toLocaleDateString("en-CA", { timeZone: "America/Chicago" });
+      const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Chicago" });
+      return ctDay === today;
+    } catch (e) { return false; }
+  })();
   const hasScore = m.home.score !== null && m.away.score !== null;
   const isLive = hasScore && !m.completed;
   const Side = ({ s, right }) => (
@@ -294,6 +301,7 @@ function MatchRow({ m }) {
     </div>
   );
   const hasStarted = hasScore;
+  const showBroadcast = isToday && (!hasStarted || isLive) && (m.tv || m.stream);
   return (
     <Card style={{
       padding: isMobile ? 10 : 12,
@@ -318,6 +326,11 @@ function MatchRow({ m }) {
           padding: isMobile ? "3px 2px" : "4px 2px", borderRadius: 8,
           background: hasScore ? "rgba(255,255,255,0.04)" : "transparent",
         }}>
+          {showBroadcast && (
+            <span style={{ display: "block", color: C.mut2, fontSize: isMobile ? 8 : 9, fontWeight: 600, lineHeight: 1.2, marginBottom: 2 }}>
+              {[m.tv, m.stream].filter(Boolean).join(" \u00b7 ")}
+            </span>
+          )}
           <span style={{
             display: "block", fontFamily: FONT_DISPLAY, fontWeight: 600, fontSize: isMobile ? 15 : 17, letterSpacing: 0.5,
             color: hasScore ? C.text : C.mut2,
