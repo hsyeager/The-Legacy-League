@@ -103,6 +103,10 @@ const MANAGERS = [
   { gold: "David Berman",                  silver: "JD Danielson",                bronze: "Dylan Friendly" },
 ];
 
+// Map team code -> squad index, so we can look up which managers own a given team.
+const TEAM_SQUAD = {};
+SQUADS.forEach((squad, i) => squad.forEach((code) => { TEAM_SQUAD[code] = i; }));
+
 const DIVISIONS = [
   { key: "gold",   label: "Premier League", color: "#e8be4a", dim: "#d4a017" },
   { key: "silver", label: "Undertakers",    color: "#cdd5e0", dim: "#9aa6b8" },
@@ -913,6 +917,23 @@ function teamMatchPoints(code, m) {
   return m.adv ? { pts: W + adv, detail: `${W} win, +${adv} advance` } : { pts: 0, detail: "lost" };
 }
 
+// Shows the gold/silver/bronze managers who own a team, with a dot in their division color.
+function TeamOwners({ code, align }) {
+  const i = TEAM_SQUAD[code];
+  if (i == null) return null;
+  const m = MANAGERS[i];
+  return (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 6, justifyContent: align }}>
+      {DIVISIONS.map((d) => (
+        <span key={d.key} style={{ display: "inline-flex", alignItems: "center", gap: 3, fontSize: 10.5, color: C.mut2, whiteSpace: "nowrap" }}>
+          <span style={{ width: 6, height: 6, borderRadius: 99, background: d.color, flexShrink: 0 }} />
+          {m[d.key]}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function MatchRow({ m }) {
   const dt = (() => {
     try {
@@ -949,6 +970,11 @@ function MatchRow({ m }) {
           {m.completed ? `${m.home.score}\u2013${m.away.score}` : "vs"}
         </span>
         <Side s={m.away} right={true} />
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-start", gap: 8, marginTop: 6 }}>
+        <div style={{ flex: 1, minWidth: 0 }}><TeamOwners code={m.home.code} align="flex-start" /></div>
+        <span style={{ flexShrink: 0, width: 46 }} />
+        <div style={{ flex: 1, minWidth: 0 }}><TeamOwners code={m.away.code} align="flex-end" /></div>
       </div>
     </Card>
   );
