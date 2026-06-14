@@ -345,9 +345,10 @@ function MatchRow({ m }) {
 function GameLogTab({ schedule }) {
   const [openPast, setOpenPast] = useState(false);
   const [openToday, setOpenToday] = useState(true);
-  const [openFuture, setOpenFuture] = useState(false);
+  const [openFutureDates, setOpenFutureDates] = useState({});
 
   const ctDay = (iso) => { try { return new Date(iso).toLocaleDateString("en-CA", { timeZone: "America/Chicago" }); } catch (e) { return ""; } };
+  const dateLabel = (d) => { try { return new Date(`${d}T12:00:00Z`).toLocaleDateString("en-US", { timeZone: "America/Chicago", weekday: "long", month: "long", day: "numeric" }); } catch (e) { return d; } };
   const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Chicago" });
 
   const past = [], todayG = [], future = [];
@@ -357,6 +358,14 @@ function GameLogTab({ schedule }) {
     if (d < today) past.push(m);
     else if (d === today) todayG.push(m);
     else future.push(m);
+  });
+
+  const futureByDate = [];
+  future.forEach((m) => {
+    const d = ctDay(m.date);
+    const group = futureByDate[futureByDate.length - 1];
+    if (group && group.date === d) group.matches.push(m);
+    else futureByDate.push({ date: d, matches: [m] });
   });
 
   return (
@@ -380,9 +389,18 @@ function GameLogTab({ schedule }) {
         {todayG.length ? todayG.map((m) => <MatchRow key={m.matchNo} m={m} />) : <Card style={{ padding: 12 }}><span style={{ color: C.mut2, fontSize: 13 }}>No matches scheduled today.</span></Card>}
       </CollapsibleSection>
 
-      <CollapsibleSection title={`Future (${future.length})`} open={openFuture} onToggle={() => setOpenFuture((o) => !o)}>
-        {future.length ? future.map((m) => <MatchRow key={m.matchNo} m={m} />) : <Card style={{ padding: 12 }}><span style={{ color: C.mut2, fontSize: 13 }}>No upcoming matches.</span></Card>}
-      </CollapsibleSection>
+      {futureByDate.length ? futureByDate.map(({ date, matches }) => (
+        <CollapsibleSection
+          key={date}
+          title={`${dateLabel(date)} (${matches.length})`}
+          open={!!openFutureDates[date]}
+          onToggle={() => setOpenFutureDates((o) => ({ ...o, [date]: !o[date] }))}
+        >
+          {matches.map((m) => <MatchRow key={m.matchNo} m={m} />)}
+        </CollapsibleSection>
+      )) : (
+        <Card style={{ padding: 12 }}><span style={{ color: C.mut2, fontSize: 13 }}>No upcoming matches.</span></Card>
+      )}
     </div>
   );
 }
